@@ -23,8 +23,8 @@
 ARCH = ARM
 OS = LINUX
 
-CFLAGS  = -Wall -pipe -O3
-LDFLAGS =
+CFLAGS  = -Wall -pipe -O3 -g
+LDFLAGS = -g
 
 COMPILER_DIR = /usr
 SO_EXTENSION = so
@@ -33,24 +33,23 @@ CXX =  $(COMPILER_DIR)/bin/g++
 LD =  $(COMPILER_DIR)/bin/g++
 INCLUDE = /usr/local/include
 CFLAGS  += -I$(INCLUDE)/libpng12
-CFLAGS  += -I/usr/include/SDL/
+CFLAGS  += -I/usr/include/SDL2/
 CFLAGS += -I$(INCLUDE)
 CFLAGS += -I/opt/vc/include/
 CFLAGS += -I/opt/vc/include/interface/vcos/pthreads/
 CFLAGS += -I/opt/vc/include/interface/vmcs_host/linux
 
-CFLAGS += -mfpu=neon -mfloat-abi=hard
+CFLAGS += -mfpu=neon -mfloat-abi=hard -flto
 CFLAGS += -D__CRC_OPT -D__TRIBUFFER_OPT -D__VEC4_OPT -DARM -DUSE_SDL 
 
 ifeq ($(OS), LINUX)
 CFLAGS += -Wall -D__LINUX__ -fPIC
 LDFLAGS += -L/usr/lib
-LDFLAGS += -L/opt/vc/lib
-LDFLAGS += -lEGL -lGLESv2 -lSDL -lpng12 -lz
-LDFLAGS += -lX11 -lXau -shared
+LDFLAGS += -lpng -lGLESv2 -lSDL2
+LDFLAGS += -shared
 else
 CFLAGS += -Wall
-LDFLAGS += -lSDLmain -lSDL -lpng -lGLESv2 -lEGL
+LDFLAGS += -lGLESv2 -lpng -lSDL2
 endif
 
 #CFLAGS += -DPROFILE_GBI

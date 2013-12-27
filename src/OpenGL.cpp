@@ -5,9 +5,11 @@
 #include <string.h>
 #include <time.h>
 #include <png.h>
+#if 0
 #include <X11/Xlib.h>
 #include <X11/Xatom.h>
 #include <X11/Xutil.h>
+#endif
 #include <unistd.h>
 
 //#include "bcm_host.h"
