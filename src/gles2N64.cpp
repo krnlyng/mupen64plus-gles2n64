@@ -66,6 +66,22 @@ EXPORT m64p_error CALL PluginStartup(m64p_dynlib_handle CoreLibHandle,
     ConfigGetSharedDataFilepath = (ptr_ConfigGetSharedDataFilepath)
             dlsym(CoreLibHandle, "ConfigGetSharedDataFilepath");
 
+    CoreVideo_Init = (ptr_VidExt_Init) dlsym(CoreLibHandle, "VidExt_Init");
+    CoreVideo_Quit = (ptr_VidExt_Quit) dlsym(CoreLibHandle, "VidExt_Quit");
+    CoreVideo_ListFullscreenModes = (ptr_VidExt_ListFullscreenModes) dlsym(CoreLibHandle, "VidExt_ListFullscreenModes");
+    CoreVideo_SetVideoMode = (ptr_VidExt_SetVideoMode) dlsym(CoreLibHandle, "VidExt_SetVideoMode");
+    CoreVideo_SetCaption = (ptr_VidExt_SetCaption) dlsym(CoreLibHandle, "VidExt_SetCaption");
+    CoreVideo_ToggleFullScreen = (ptr_VidExt_ToggleFullScreen) dlsym(CoreLibHandle, "VidExt_ToggleFullScreen");
+    CoreVideo_GL_GetProcAddress = (ptr_VidExt_GL_GetProcAddress) dlsym(CoreLibHandle, "VidExt_GL_GetProcAddress");
+    CoreVideo_GL_SetAttribute = (ptr_VidExt_GL_SetAttribute) dlsym(CoreLibHandle, "VidExt_GL_SetAttribute");
+    CoreVideo_GL_GetAttribute = (ptr_VidExt_GL_GetAttribute) dlsym(CoreLibHandle, "VidExt_GL_GetAttribute");
+    CoreVideo_GL_SwapBuffers = (ptr_VidExt_GL_SwapBuffers) dlsym(CoreLibHandle, "VidExt_GL_SwapBuffers");
+    if (!CoreVideo_Init || !CoreVideo_Quit || !CoreVideo_ListFullscreenModes || !CoreVideo_SetVideoMode |   !CoreVideo_SetCaption || !CoreVideo_ToggleFullScreen || !CoreVideo_GL_GetProcAddress ||
+                !CoreVideo_GL_SetAttribute || !CoreVideo_GL_GetAttribute || !CoreVideo_GL_SwapBuffers)
+    {
+        //DebugMessage(M64MSG_ERROR,"Error initializing vidext function pointers");
+    }
+
     return M64ERR_SUCCESS;
 }
 
