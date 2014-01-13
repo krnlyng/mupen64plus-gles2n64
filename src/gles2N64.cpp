@@ -26,7 +26,28 @@ void        (*CheckInterrupts)( void );
 char        configdir[PATH_MAX] = {0};
 void        (*renderCallback)() = NULL;
 
+/* definitions of pointers to Core config functions */
+ptr_ConfigOpenSection      ConfigOpenSection = NULL;
+ptr_ConfigDeleteSection    ConfigDeleteSection = NULL;
+ptr_ConfigSaveSection      ConfigSaveSection = NULL;
+ptr_ConfigListParameters   ConfigListParameters = NULL;
+ptr_ConfigSaveFile         ConfigSaveFile = NULL;
+ptr_ConfigSetParameter     ConfigSetParameter = NULL;
+ptr_ConfigGetParameter     ConfigGetParameter = NULL;
+ptr_ConfigGetParameterHelp ConfigGetParameterHelp = NULL;
+ptr_ConfigSetDefaultInt    ConfigSetDefaultInt = NULL;
+ptr_ConfigSetDefaultFloat  ConfigSetDefaultFloat = NULL;
+ptr_ConfigSetDefaultBool   ConfigSetDefaultBool = NULL;
+ptr_ConfigSetDefaultString ConfigSetDefaultString = NULL;
+ptr_ConfigGetParamInt      ConfigGetParamInt = NULL;
+ptr_ConfigGetParamFloat    ConfigGetParamFloat = NULL;
+ptr_ConfigGetParamBool     ConfigGetParamBool = NULL;
+ptr_ConfigGetParamString   ConfigGetParamString = NULL;
+
 ptr_ConfigGetSharedDataFilepath ConfigGetSharedDataFilepath = NULL;
+ptr_ConfigGetUserConfigPath     ConfigGetUserConfigPath = NULL;
+ptr_ConfigGetUserDataPath       ConfigGetUserDataPath = NULL;
+ptr_ConfigGetUserCachePath      ConfigGetUserCachePath = NULL;
 
 ptr_VidExt_Init                  CoreVideo_Init = NULL;
 ptr_VidExt_Quit                  CoreVideo_Quit = NULL;
@@ -38,6 +59,26 @@ ptr_VidExt_GL_GetProcAddress     CoreVideo_GL_GetProcAddress = NULL;
 ptr_VidExt_GL_SetAttribute       CoreVideo_GL_SetAttribute = NULL;
 ptr_VidExt_GL_GetAttribute       CoreVideo_GL_GetAttribute = NULL;
 ptr_VidExt_GL_SwapBuffers        CoreVideo_GL_SwapBuffers = NULL;
+
+static void (*l_DebugCallback)(void *, int, const char *) = NULL;
+static void *l_DebugCallContext = NULL;
+
+/* Global functions */
+void DebugMessage(int level, const char *message, ...)
+{
+  char msgbuf[1024];
+  va_list args;
+
+  if (l_DebugCallback == NULL)
+      return;
+
+  va_start(args, message);
+  vsprintf(msgbuf, message, args);
+
+  (*l_DebugCallback)(l_DebugCallContext, level, msgbuf);
+
+  va_end(args);
+}
 
 extern "C" {
 
@@ -63,8 +104,7 @@ EXPORT void CALL DrawScreen (void)
 EXPORT m64p_error CALL PluginStartup(m64p_dynlib_handle CoreLibHandle,
         void *Context, void (*DebugCallback)(void *, int, const char *))
 {
-    ConfigGetSharedDataFilepath = (ptr_ConfigGetSharedDataFilepath)
-            dlsym(CoreLibHandle, "ConfigGetSharedDataFilepath");
+    l_DebugCallback = DebugCallback;
 
     CoreVideo_Init = (ptr_VidExt_Init) dlsym(CoreLibHandle, "VidExt_Init");
     CoreVideo_Quit = (ptr_VidExt_Quit) dlsym(CoreLibHandle, "VidExt_Quit");
@@ -79,8 +119,41 @@ EXPORT m64p_error CALL PluginStartup(m64p_dynlib_handle CoreLibHandle,
     if (!CoreVideo_Init || !CoreVideo_Quit || !CoreVideo_ListFullscreenModes || !CoreVideo_SetVideoMode |   !CoreVideo_SetCaption || !CoreVideo_ToggleFullScreen || !CoreVideo_GL_GetProcAddress ||
                 !CoreVideo_GL_SetAttribute || !CoreVideo_GL_GetAttribute || !CoreVideo_GL_SwapBuffers)
     {
-        //DebugMessage(M64MSG_ERROR,"Error initializing vidext function pointers");
+        DebugMessage(M64MSG_ERROR,"Error initializing vidext function pointers");
+	return M64ERR_INCOMPATIBLE;
     }
+
+    /* Get the core config function pointers from the library handle */
+    ConfigOpenSection = (ptr_ConfigOpenSection) dlsym(CoreLibHandle, "ConfigOpenSection");
+    ConfigDeleteSection = (ptr_ConfigDeleteSection) dlsym(CoreLibHandle, "ConfigDeleteSection");
+    ConfigSaveFile = (ptr_ConfigSaveFile) dlsym(CoreLibHandle, "ConfigSaveFile");
+    ConfigSaveSection = (ptr_ConfigSaveSection) dlsym(CoreLibHandle, "ConfigSaveSection");
+    ConfigListParameters = (ptr_ConfigListParameters) dlsym(CoreLibHandle, "ConfigListParameters");
+    ConfigSetParameter = (ptr_ConfigSetParameter) dlsym(CoreLibHandle, "ConfigSetParameter");
+    ConfigGetParameter = (ptr_ConfigGetParameter) dlsym(CoreLibHandle, "ConfigGetParameter");
+    ConfigSetDefaultInt = (ptr_ConfigSetDefaultInt) dlsym(CoreLibHandle, "ConfigSetDefaultInt");
+    ConfigSetDefaultFloat = (ptr_ConfigSetDefaultFloat) dlsym(CoreLibHandle, "ConfigSetDefaultFloat");
+    ConfigSetDefaultBool = (ptr_ConfigSetDefaultBool) dlsym(CoreLibHandle, "ConfigSetDefaultBool");
+    ConfigSetDefaultString = (ptr_ConfigSetDefaultString) dlsym(CoreLibHandle, "ConfigSetDefaultString");
+    ConfigGetParamInt = (ptr_ConfigGetParamInt) dlsym(CoreLibHandle, "ConfigGetParamInt");
+    ConfigGetParamFloat = (ptr_ConfigGetParamFloat) dlsym(CoreLibHandle, "ConfigGetParamFloat");
+    ConfigGetParamBool = (ptr_ConfigGetParamBool) dlsym(CoreLibHandle, "ConfigGetParamBool");
+    ConfigGetParamString = (ptr_ConfigGetParamString) dlsym(CoreLibHandle, "ConfigGetParamString");
+
+    ConfigGetSharedDataFilepath = (ptr_ConfigGetSharedDataFilepath) dlsym(CoreLibHandle, "ConfigGetSharedDataFilepath");
+    ConfigGetUserConfigPath = (ptr_ConfigGetUserConfigPath) dlsym(CoreLibHandle, "ConfigGetUserConfigPath");
+    ConfigGetUserDataPath = (ptr_ConfigGetUserDataPath) dlsym(CoreLibHandle, "ConfigGetUserDataPath");
+    ConfigGetUserCachePath = (ptr_ConfigGetUserCachePath) dlsym(CoreLibHandle, "ConfigGetUserCachePath");
+
+    if (!ConfigOpenSection || !ConfigDeleteSection || !ConfigSaveFile || !ConfigSaveSection || !ConfigSetParameter || !ConfigGetParameter ||
+        !ConfigSetDefaultInt || !ConfigSetDefaultFloat || !ConfigSetDefaultBool || !ConfigSetDefaultString ||
+        !ConfigGetParamInt   || !ConfigGetParamFloat   || !ConfigGetParamBool   || !ConfigGetParamString ||
+        !ConfigGetSharedDataFilepath || !ConfigGetUserConfigPath || !ConfigGetUserDataPath || !ConfigGetUserCachePath)
+    {
+        DebugMessage(M64MSG_ERROR, "Couldn't connect to Core configuration functions");
+        return M64ERR_INCOMPATIBLE;
+    }
+
 
     return M64ERR_SUCCESS;
 }
