@@ -44,53 +44,53 @@ static m64p_handle l_ConfigVideo = NULL;
 struct option_mapping {
     const char *oldconfig;
     const char *newconfig;
-    m64p_type type;
+    int *cfg;
 };
 
 option_mapping option_mappings[] = {
-    {"window centre", "WindowCentre", M64TYPE_BOOL},
-    {"window xpos", "WindowXPos", M64TYPE_INT},
-    {"window ypos", "WindowYPos", M64TYPE_INT},
-    {"window width", "WindowWidth", M64TYPE_INT},
-    {"window height", "WindowHeight", M64TYPE_INT},
+    {"window centre", "WindowCentre", &config.window.centre},
+    {"window xpos", "WindowXPos", &config.window.xpos},
+    {"window ypos", "WindowYPos", &config.window.ypos},
+    {"window width", "WindowWidth", &config.window.width},
+    {"window height", "WindowHeight", &config.window.height},
 
-    {"framebuffer enable", "FramebufferEnable", M64TYPE_BOOL},
-    {"framebuffer bilinear", "FramebufferBilinear", M64TYPE_BOOL},
-    {"framebuffer width", "FramebufferWidth", M64TYPE_INT},
-    {"framebuffer height", "FramebufferHeight", M64TYPE_INT},
+    {"framebuffer enable", "FramebufferEnable", &config.framebuffer.enable},
+    {"framebuffer bilinear", "FramebufferBilinear", &config.framebuffer.bilinear},
+    {"framebuffer width", "FramebufferWidth", &config.framebuffer.width},
+    {"framebuffer height", "FramebufferHeight", &config.framebuffer.height},
 
-    {"video force", "VIForce", M64TYPE_BOOL},
-    {"video width", "VIWidth", M64TYPE_INT},
-    {"video height", "VIHeight", M64TYPE_INT},
+    {"video force", "VIForce", &config.video.force},
+    {"video width", "VIWidth", &config.video.width},
+    {"video height", "VIHeight", &config.video.height},
 
-    {"enable fog", "RenderFog", M64TYPE_BOOL},
-    {"enable primitive z", "RenderPrimitiveZ", M64TYPE_BOOL},
-    {"enable lighting", "RenderLighting", M64TYPE_BOOL},
-    {"enable alpha test", "RenderAlphaTest", M64TYPE_BOOL},
-    {"enable clipping", "RenderClipping", M64TYPE_BOOL},
-    {"enable face culling", "RenderFaceCulling", M64TYPE_BOOL},
-    {"enable noise", "RenderNoise", M64TYPE_BOOL},
+    {"enable fog", "RenderFog", &config.enableFog},
+    {"enable primitive z", "RenderPrimitiveZ", &config.enablePrimZ},
+    {"enable lighting", "RenderLighting", &config.enableLighting},
+    {"enable alpha test", "RenderAlphaTest", &config.enableAlphaTest},
+    {"enable clipping", "RenderClipping", &config.enableClipping},
+    {"enable face culling", "RenderFaceCulling", &config.enableFaceCulling},
+    {"enable noise", "RenderNoise", &config.enableNoise},
 
-    {"texture 2xSAI", "Texture2xSAI", M64TYPE_BOOL},
-    {"texture force bilinear", "TextureForceBilinear", M64TYPE_BOOL},
-    {"texture max anisotropy", "TextureForceMaxAnisotropy", M64TYPE_BOOL},
-    {"texture use IA", "TextureUseIA", M64TYPE_BOOL},
-    {"texture fast CRC", "TextureFastCRC", M64TYPE_BOOL},
-    {"texture pow2", "TexturePow2", M64TYPE_BOOL},
+    {"texture 2xSAI", "Texture2xSAI", &config.texture.sai2x},
+    {"texture force bilinear", "TextureForceBilinear", &config.texture.forceBilinear},
+    {"texture max anisotropy", "TextureForceMaxAnisotropy", &config.texture.maxAnisotropy},
+    {"texture use IA", "TextureUseIA", &config.texture.useIA},
+    {"texture fast CRC", "TextureFastCRC", &config.texture.fastCRC},
+    {"texture pow2", "TexturePow2", &config.texture.pow2},
 
-    {"auto frameskip", "FrameskipAuto", M64TYPE_BOOL},
-    {"target FPS", "FrameskipTargetFPS", M64TYPE_INT},
-    {"frame render rate", "FrameskipRenderRate", M64TYPE_INT},
+    {"auto frameskip", "FrameskipAuto", &config.autoFrameSkip},
+    {"target FPS", "FrameskipTargetFPS", &config.targetFPS},
+    {"frame render rate", "FrameskipRenderRate", &config.frameRenderRate},
 
-    {"update mode", "UpdateMode", M64TYPE_BOOL},
-    {"ignore offscreen rendering", "IgnoreOffscreenRendering", M64TYPE_BOOL},
-    {"force screen clear", "ForceBufferClear", M64TYPE_BOOL},
-    {"flip vertical", "FlipVertical", M64TYPE_BOOL},
+    {"update mode", "UpdateMode", &config.updateMode},
+    {"ignore offscreen rendering", "IgnoreOffscreenRendering", &config.ignoreOffscreenRendering},
+    {"force screen clear", "ForceBufferClear", &config.forceBufferClear},
+    {"flip vertical", "FlipVertical", &config.screen.flipVertical},
 
-    {"hack banjo tooie", "HackBanjoTooie", M64TYPE_BOOL},
-    {"hack zelda", "HackZelda", M64TYPE_BOOL},
-    {"hack alpha", "HackAlpha", M64TYPE_BOOL},
-    {"hack z", "HackZ", M64TYPE_BOOL},
+    {"hack banjo tooie", "HackBanjoTooie", &config.hackBanjoTooie},
+    {"hack zelda", "HackZelda", &config.hackZelda},
+    {"hack alpha", "HackAlpha", &config.hackAlpha},
+    {"hack z", "HackZ", &config.zHack},
 };
 
 const int option_mapping_count = sizeof(option_mappings) / sizeof(option_mapping);
@@ -100,8 +100,8 @@ void Config_SetOption(const char *config, const char *value)
     int i = 0;
     int setting = atoi(value);
     for(i=0;i<option_mapping_count;i++) {
-        if(0 == strcmp(config, option_mappings[i].oldconfig)) {
-            ConfigSetParameter(l_ConfigVideo, option_mappings[i].newconfig, option_mappings[i].type, &setting);
+        if(0 == strcmp(config, option_mappings[i].oldconfig) || 0 == strcmp(config, option_mappings[i].newconfig)) {
+	    *(option_mappings[i].cfg) = setting;
             break;
         }
     }
