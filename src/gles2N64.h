@@ -20,10 +20,11 @@ extern ptr_ConfigGetSharedDataFilepath ConfigGetSharedDataFilepath;
 
 extern HWND         hWnd;
 extern char *screenDirectory;
-extern char configdir[PATH_MAX];
 
 extern void (*CheckInterrupts)( void );
 extern void (*renderCallback)();
+
+void DebugMessage(int level, const char *message, ...);
 
 extern ptr_VidExt_Init                  CoreVideo_Init;
 extern ptr_VidExt_Quit                  CoreVideo_Quit;

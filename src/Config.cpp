@@ -37,157 +37,71 @@
 
 Config config;
 
-struct Option
-{
-    const char* name;
-    int*  data;
-    const int   initial;
+
+static m64p_handle l_ConfigVideoGeneral = NULL;
+static m64p_handle l_ConfigVideo = NULL;
+
+struct option_mapping {
+    const char *oldconfig;
+    const char *newconfig;
+    m64p_type type;
 };
 
+option_mapping option_mappings[] = {
+    {"window centre", "WindowCentre", M64TYPE_BOOL},
+    {"window xpos", "WindowXPos", M64TYPE_INT},
+    {"window ypos", "WindowYPos", M64TYPE_INT},
+    {"window width", "WindowWidth", M64TYPE_INT},
+    {"window height", "WindowHeight", M64TYPE_INT},
 
-#define CONFIG_VERSION 2
+    {"framebuffer enable", "FramebufferEnable", M64TYPE_BOOL},
+    {"framebuffer bilinear", "FramebufferBilinear", M64TYPE_BOOL},
+    {"framebuffer width", "FramebufferWidth", M64TYPE_INT},
+    {"framebuffer height", "FramebufferHeight", M64TYPE_INT},
 
-Option configOptions[] =
-{
-    {"#gles2n64 Graphics Plugin for N64", NULL, 0},
-    {"#by Orkin / glN64 developers and Adventus.", NULL, 0},
+    {"video force", "VIForce", M64TYPE_BOOL},
+    {"video width", "VIWidth", M64TYPE_INT},
+    {"video height", "VIHeight", M64TYPE_INT},
 
-    {"config version", &config.version, 0},
-    {"", NULL, 0},
+    {"enable fog", "RenderFog", M64TYPE_BOOL},
+    {"enable primitive z", "RenderPrimitiveZ", M64TYPE_BOOL},
+    {"enable lighting", "RenderLighting", M64TYPE_BOOL},
+    {"enable alpha test", "RenderAlphaTest", M64TYPE_BOOL},
+    {"enable clipping", "RenderClipping", M64TYPE_BOOL},
+    {"enable face culling", "RenderFaceCulling", M64TYPE_BOOL},
+    {"enable noise", "RenderNoise", M64TYPE_BOOL},
 
-    {"#Screen Settings:", NULL, 0},
-    {"screen width", &config.screen.width, 800},
-    {"screen height", &config.screen.height, 480},
-    {"", NULL, 0},
+    {"texture 2xSAI", "Texture2xSAI", M64TYPE_BOOL},
+    {"texture force bilinear", "TextureForceBilinear", M64TYPE_BOOL},
+    {"texture max anisotropy", "TextureForceMaxAnisotropy", M64TYPE_BOOL},
+    {"texture use IA", "TextureUseIA", M64TYPE_BOOL},
+    {"texture fast CRC", "TextureFastCRC", M64TYPE_BOOL},
+    {"texture pow2", "TexturePow2", M64TYPE_BOOL},
 
-    {"#Window Settings:", NULL, 0},
-    {"window enable x11", &config.window.enableX11, 1},
-    {"window fullscreen", &config.window.fullscreen, 1},
-    {"window centre", &config.window.centre, 1},
-    {"window xpos", &config.window.xpos, 0},
-    {"window ypos", &config.window.ypos, 0},
-    {"window width", &config.window.width, 800},
-    {"window height", &config.window.height, 480},
-    {"", NULL, 0},
+    {"auto frameskip", "FrameskipAuto", M64TYPE_BOOL},
+    {"target FPS", "FrameskipTargetFPS", M64TYPE_INT},
+    {"frame render rate", "FrameskipRenderRate", M64TYPE_INT},
 
-    {"#Framebuffer Settings:",NULL,0},
-    {"framebuffer enable", &config.framebuffer.enable, 0},
-    {"framebuffer bilinear", &config.framebuffer.bilinear, 0},
-    {"framebuffer width", &config.framebuffer.width, 400},
-    {"framebuffer height", &config.framebuffer.height, 240},
-    {"", NULL, 0},
+    {"update mode", "UpdateMode", M64TYPE_BOOL},
+    {"ignore offscreen rendering", "IgnoreOffscreenRendering", M64TYPE_BOOL},
+    {"force screen clear", "ForceBufferClear", M64TYPE_BOOL},
+    {"flip vertical", "FlipVertical", M64TYPE_BOOL},
 
-    {"#VI Settings:", NULL, 0},
-    {"video force", &config.video.force, 0},
-    {"video width", &config.video.width, 320},
-    {"video height", &config.video.height, 240},
-    {"", NULL, 0},
-
-    {"#Render Settings:", NULL, 0},
-    {"enable fog", &config.enableFog, 0},
-    {"enable primitive z", &config.enablePrimZ, 1},
-    {"enable lighting", &config.enableLighting, 1},
-    {"enable alpha test", &config.enableAlphaTest, 1},
-    {"enable clipping", &config.enableClipping, 0},
-    {"enable face culling", &config.enableFaceCulling, 1},
-    {"enable noise", &config.enableNoise, 0},
-    {"", NULL, 0},
-
-    {"#Texture Settings:", NULL, 0},
-    {"texture 2xSAI", &config.texture.sai2x, 0},
-    {"texture force bilinear", &config.texture.forceBilinear, 0},
-    {"texture max anisotropy", &config.texture.maxAnisotropy, 0},
-    {"texture use IA", &config.texture.useIA, 0},
-    {"texture fast CRC", &config.texture.fastCRC, 1},
-    {"texture pow2", &config.texture.pow2, 1},
-    {"", NULL, 0},
-
-    {"#Frame skip:", NULL, 0},
-    {"auto frameskip", &config.autoFrameSkip, 0},
-    {"target FPS", &config.targetFPS, 20},
-    {"frame render rate", &config.frameRenderRate, 1},
-    {"vertical sync", &config.verticalSync, 0},
-    {"", NULL, 0},
-
-    {"#Other Settings:", NULL, 0},
-    {"update mode", &config.updateMode, SCREEN_UPDATE_AT_VI_UPDATE },
-    {"ignore offscreen rendering", &config.ignoreOffscreenRendering, 0},
-    {"force screen clear", &config.forceBufferClear, 0},
-    {"flip vertical", &config.screen.flipVertical, 0},
-    {"", NULL, 0},
-
-    {"#Hack Settings:", NULL, 0},
-    {"hack banjo tooie", &config.hackBanjoTooie, 0},
-    {"hack zelda", &config.hackZelda, 0},
-    {"hack alpha", &config.hackAlpha, 0},
-    {"hack z", &config.zHack, 0},
-
+    {"hack banjo tooie", "HackBanjoTooie", M64TYPE_BOOL},
+    {"hack zelda", "HackZelda", M64TYPE_BOOL},
+    {"hack alpha", "HackAlpha", M64TYPE_BOOL},
+    {"hack z", "HackZ", M64TYPE_BOOL},
 };
 
-const int configOptionsSize = sizeof(configOptions) / sizeof(Option);
+const int option_mapping_count = sizeof(option_mappings) / sizeof(option_mapping);
 
-static inline const char *GetPluginDir()
+void Config_SetOption(const char *config, const char *value)
 {
-    static char path[PATH_MAX];
-
-    if(strlen(configdir) > 0)
-    {
-        strncpy(path, configdir, PATH_MAX);
-        // remove trailing '/'
-        if(path[strlen(path)-1] == '/')
-            path[strlen(path)-1] = '\0';
-    }
-    else
-    {
-        strcat(path, ".");
-    }
-
-    return path;
-}
-
-void Config_WriteConfig(const char *filename)
-{
-    config.version = CONFIG_VERSION;
-    FILE* f = fopen(filename, "w");
-    if (!f)
-    {
-        LOG(LOG_ERROR, "Could Not Open %s for writing\n", filename);
-    }
-
-    for(int i=0; i<configOptionsSize; i++)
-    {
-        Option *o = &configOptions[i];
-        fprintf(f, o->name);
-        if (o->data) fprintf(f,"=%i", *(o->data));
-        fprintf(f, "\n");
-    }
-
-
-    fclose(f);
-}
-
-void Config_SetDefault()
-{
-    for(int i=0; i < configOptionsSize; i++)
-    {
-        Option *o = &configOptions[i];
-        if (o->data) *(o->data) = o->initial;
-    }
-}
-
-void Config_SetOption(char* line, char* val)
-{
-    for(int i=0; i< configOptionsSize; i++)
-    {
-        Option *o = &configOptions[i];
-        if (strcasecmp(line, o->name) == 0)
-        {
-            if (o->data)
-            {
-                int v = atoi(val);
-                *(o->data) = v;
-                LOG(LOG_VERBOSE, "Config Option: %s = %i\n", o->name, v);
-            }
+    int i = 0;
+    int setting = atoi(value);
+    for(i=0;i<option_mapping_count;i++) {
+        if(0 == strcmp(config, option_mappings[i].oldconfig)) {
+            ConfigSetParameter(l_ConfigVideo, option_mappings[i].newconfig, option_mappings[i].type, &setting);
             break;
         }
     }
@@ -196,14 +110,14 @@ void Config_SetOption(char* line, char* val)
 void Config_LoadRomConfig(unsigned char* header)
 {
     char line[4096];
-    char filename[PATH_MAX];
+    const char *filename;
 
     // get the name of the ROM
     for (int i=0; i<20; i++) config.romName[i] = header[0x20+i];
-    config.romName[20] = '\0';
+config.romName[20] = '\0';
     while (config.romName[strlen(config.romName)-1] == ' ')
     {
-        config.romName[strlen(config.romName)-1] = '\0';
+    config.romName[strlen(config.romName)-1] = '\0';
     }
 
     switch(header[0x3e])
@@ -230,7 +144,7 @@ void Config_LoadRomConfig(unsigned char* header)
 
     LOG(LOG_MINIMAL, "Rom is %s\n", config.romPAL ? "PAL" : "NTSC");
 
-    snprintf(filename, PATH_MAX, "%s/gles2n64rom.conf", GetPluginDir());
+    filename = ConfigGetSharedDataFilepath("gles2n64rom.conf");
     FILE *f = fopen(filename,"r");
     if (!f)
     {
@@ -266,66 +180,143 @@ void Config_LoadRomConfig(unsigned char* header)
     }
 }
 
+
 void Config_LoadConfig()
 {
-    FILE *f;
-    char line[4096];
-
-    // default configuration
-    Config_SetDefault();
-
-    // read configuration
-    char filename[PATH_MAX];
-    snprintf(filename, PATH_MAX, "%s/gles2n64.conf", GetPluginDir());
-    f = fopen(filename, "r");
-    if (!f)
+    if(M64ERR_SUCCESS != ConfigOpenSection("Video-General", &l_ConfigVideoGeneral))
     {
-        LOG(LOG_MINIMAL, "[gles2N64]: Couldn't open config file '%s' for reading: %s\n", filename, strerror( errno ) );
-        LOG(LOG_MINIMAL, "[gles2N64]: Attempting to write new Config \n");
-        Config_WriteConfig(filename);
+        DebugMessage(M64MSG_ERROR, "failed to open 'Video-General' configuration section");
+        return;
     }
-    else
+    if(M64ERR_SUCCESS != ConfigOpenSection("Video-gles2n64", &l_ConfigVideo))
     {
-        LOG(LOG_MINIMAL, "[gles2n64]: Loading Config from %s \n", filename);
-
-        while (!feof( f ))
-        {
-            char *val;
-            fgets( line, 4096, f );
-
-            if (line[0] == '#' || line[0] == '\n')
-                continue;
-
-            val = strchr( line, '=' );
-            if (!val) continue;
-
-            *val++ = '\0';
-
-             Config_SetOption(line,val);
-        }
-
-        if (config.version < CONFIG_VERSION)
-        {
-            LOG(LOG_WARNING, "[gles2N64]: Wrong config version, rewriting config with defaults\n");
-            Config_SetDefault();
-            Config_WriteConfig(filename);
-        }
-
-        fclose(f);
+        DebugMessage(M64MSG_ERROR, "failed to open 'Video-gles2n64' configuration section");
+        return;
     }
-}
 
-void Config_DoConfig(HWND)
-{
-    FILE *f = fopen("./config/gles2n64.conf", "r" );
-    if (!f)
-    {
-        Config_SetDefault();
-        Config_WriteConfig("./config/gles2n64.conf");
-    }
-    else
-        fclose(f);
+    // Video-General Settings
+    // set default options
+    ConfigSetDefaultBool(l_ConfigVideoGeneral, "Fullscreen", true, "Use fullscreen mode if True, or windowed mode if False");
+    ConfigSetDefaultInt(l_ConfigVideoGeneral, "ScreenWidth", 640, "Width of output window or fullscreen width");
+    ConfigSetDefaultInt(l_ConfigVideoGeneral, "ScreenHeight", 480, "Height of output window or fullscreen height");
+    ConfigSetDefaultBool(l_ConfigVideoGeneral, "VerticalSync", false, "Use vertical sync if True, or not if False");
+    // end set default options
 
-    system("mousepad ./config/gles2n64.conf");
+    // get settings
+    config.window.fullscreen = ConfigGetParamBool(l_ConfigVideoGeneral, "Fullscreen");
+    config.screen.width = ConfigGetParamInt(l_ConfigVideoGeneral, "ScreenWidth");
+    config.screen.height = ConfigGetParamInt(l_ConfigVideoGeneral, "ScreenHeight");
+    config.verticalSync = ConfigGetParamBool(l_ConfigVideoGeneral, "VerticalSync");
+    // end get settings
+    // end Video-General Settings
+
+    // Video-gles2n64 Settings
+    // set default options
+    // Window Settings
+    ConfigSetDefaultBool(l_ConfigVideo, "WindowCentre", true, "Center the window if True");
+    ConfigSetDefaultInt(l_ConfigVideo, "WindowXPos", 0, "X Position of the Window");
+    ConfigSetDefaultInt(l_ConfigVideo, "WindowYPos", 0, "Y Position of the Window");
+    ConfigSetDefaultInt(l_ConfigVideo, "WindowWidth", 800, "Window Width");
+    ConfigSetDefaultInt(l_ConfigVideo, "WindowHeight", 480, "Window Height");
+
+    // Framebuffer Settings
+    ConfigSetDefaultBool(l_ConfigVideo, "FramebufferEnable", false, "Enable Framebuffer");
+    ConfigSetDefaultBool(l_ConfigVideo, "FramebufferBilinear", false, "Bilinear Framebuffer");
+    ConfigSetDefaultInt(l_ConfigVideo, "FramebufferWidth", 400, "Framebuffer Width");
+    ConfigSetDefaultInt(l_ConfigVideo, "FramebufferHeight", 200, "Framebuffer Height");
+    
+    // VI Settings
+    ConfigSetDefaultBool(l_ConfigVideo, "VIForce", false, "Force VI");
+    ConfigSetDefaultInt(l_ConfigVideo, "VIWidth", 320, "VI Width");
+    ConfigSetDefaultInt(l_ConfigVideo, "VIHeight", 240, "VI Height");
+
+    // Render Settings
+    ConfigSetDefaultBool(l_ConfigVideo, "RenderFog", false, "Enable Fog");
+    ConfigSetDefaultBool(l_ConfigVideo, "RenderPrimitiveZ", true, "Enable primitive z");
+    ConfigSetDefaultBool(l_ConfigVideo, "RenderLighting", true, "Enable lighting");
+    ConfigSetDefaultBool(l_ConfigVideo, "RenderAlphaTest", true, "Enable alpha test");
+    ConfigSetDefaultBool(l_ConfigVideo, "RenderClipping", false, "Enable clipping");
+    ConfigSetDefaultBool(l_ConfigVideo, "RenderFaceCulling", true, "Enable face culling");
+    ConfigSetDefaultBool(l_ConfigVideo, "RenderNoise", false, "Enable Noise");
+
+    // Texture Settings
+    ConfigSetDefaultBool(l_ConfigVideo, "Texture2xSAI", false, "Enable 2xSAI");
+    ConfigSetDefaultBool(l_ConfigVideo, "TextureForceBilinear", false, "Force Bilinear");
+    ConfigSetDefaultBool(l_ConfigVideo, "TextureForceMaxAnisotropy", false, "Force Maximum Anisotropy");
+    ConfigSetDefaultBool(l_ConfigVideo, "TextureUseIA", false, "Use IA");
+    ConfigSetDefaultBool(l_ConfigVideo, "TextureFastCRC", true, "Use fast CRC calculation");
+    ConfigSetDefaultBool(l_ConfigVideo, "TexturePow2", true, "Use pow2");
+
+    // Frameskip Settings
+    ConfigSetDefaultBool(l_ConfigVideo, "FrameskipAuto", false, "Enable automatic Frameskipping");
+    ConfigSetDefaultInt(l_ConfigVideo, "FrameskipTargetFPS", 20, "Choose FPS setting");
+    ConfigSetDefaultInt(l_ConfigVideo, "FrameskipRenderRate", 1, "Choose frame render rate");
+
+    // Other Settings
+    ConfigSetDefaultInt(l_ConfigVideo, "UpdateMode", SCREEN_UPDATE_AT_VI_UPDATE, "Choose the screen update mode");
+    ConfigSetDefaultBool(l_ConfigVideo, "IgnoreOffscreenRendering", false, "Ignore offscreen rendering");
+    ConfigSetDefaultBool(l_ConfigVideo, "ForceBufferClear", false, "Force buffer clear");
+    ConfigSetDefaultBool(l_ConfigVideo, "FlipVertical", false, "Flip Vertical");
+
+    // hack settings
+    ConfigSetDefaultBool(l_ConfigVideo, "HackBanjoTooie", false, "Enable Banjo Tooie Hack");
+    ConfigSetDefaultBool(l_ConfigVideo, "HackZelda", false, "Enable Zelda Hack");
+    ConfigSetDefaultBool(l_ConfigVideo, "HackAlpha", false, "Enable Alpha Hack");
+    ConfigSetDefaultBool(l_ConfigVideo, "HackZ", false, "Enable Z Hack");
+    // end set default options
+
+    // get settings
+    // Window Settings
+    config.window.centre = ConfigGetParamBool(l_ConfigVideo, "WindowCentre");
+    config.window.xpos = ConfigGetParamInt(l_ConfigVideo, "WindowXPos");
+    config.window.ypos = ConfigGetParamInt(l_ConfigVideo, "WindowYPos");
+    config.window.width = ConfigGetParamInt(l_ConfigVideo, "WindowWidth");
+    config.window.height = ConfigGetParamInt(l_ConfigVideo, "WindowHeight");
+
+    // Framebuffer Settings
+    config.framebuffer.enable = ConfigGetParamBool(l_ConfigVideo, "FramebufferEnable");
+    config.framebuffer.bilinear = ConfigGetParamBool(l_ConfigVideo, "FramebufferBilinear");
+    config.framebuffer.width = ConfigGetParamInt(l_ConfigVideo, "FramebufferWidth");
+    config.framebuffer.height = ConfigGetParamBool(l_ConfigVideo, "FramebufferHeight");
+
+    // VI Settings
+    config.video.force = ConfigGetParamBool(l_ConfigVideo, "VIForce");
+    config.video.width = ConfigGetParamInt(l_ConfigVideo, "VIWidth");
+    config.video.height = ConfigGetParamInt(l_ConfigVideo, "VIHeight");
+
+    // Render Settings
+    config.enableFog = ConfigGetParamBool(l_ConfigVideo, "RenderFog");
+    config.enablePrimZ = ConfigGetParamBool(l_ConfigVideo, "RenderPrimitiveZ");
+    config.enableLighting = ConfigGetParamBool(l_ConfigVideo, "RenderLighting");
+    config.enableAlphaTest = ConfigGetParamBool(l_ConfigVideo, "RenderAlphaTest");
+    config.enableClipping = ConfigGetParamBool(l_ConfigVideo, "RenderClipping");
+    config.enableFaceCulling = ConfigGetParamBool(l_ConfigVideo, "RenderFaceCulling");
+    config.enableNoise = ConfigGetParamBool(l_ConfigVideo, "RenderNoise");
+
+    // Texture settings
+    config.texture.sai2x = ConfigGetParamBool(l_ConfigVideo, "Texture2xSAI");
+    config.texture.forceBilinear = ConfigGetParamBool(l_ConfigVideo, "TextureForceBilinear");
+    config.texture.maxAnisotropy = ConfigGetParamBool(l_ConfigVideo, "TextureForceMaxAnisotropy");
+    config.texture.useIA = ConfigGetParamBool(l_ConfigVideo, "TextureUseIA");
+    config.texture.fastCRC = ConfigGetParamBool(l_ConfigVideo, "TextureFastCRC");
+    config.texture.pow2 = ConfigGetParamBool(l_ConfigVideo, "TexturePow2");
+
+    // Frameskip Settings
+    config.autoFrameSkip = ConfigGetParamBool(l_ConfigVideo, "FrameskipAuto");
+    config.targetFPS = ConfigGetParamInt(l_ConfigVideo, "FrameskipTargetFPS");
+    config.frameRenderRate = ConfigGetParamInt(l_ConfigVideo, "FrameskipRenderRate");
+
+    // Other Settings
+    config.updateMode = ConfigGetParamInt(l_ConfigVideo, "UpdateMode");
+    config.ignoreOffscreenRendering = ConfigGetParamBool(l_ConfigVideo, "IgnoreOffscreenRendering");
+    config.forceBufferClear = ConfigGetParamBool(l_ConfigVideo, "ForceBufferClear");
+    config.screen.flipVertical = ConfigGetParamBool(l_ConfigVideo, "FlipVertical");
+
+    // Hack Settings
+    config.hackBanjoTooie = ConfigGetParamBool(l_ConfigVideo, "HackBanjoTooie");
+    config.hackZelda = ConfigGetParamBool(l_ConfigVideo, "HackZelda");
+    config.hackAlpha = ConfigGetParamBool(l_ConfigVideo, "HackAlpha");
+    config.zHack = ConfigGetParamBool(l_ConfigVideo, "HackZ");
+    // end get settings
 }
 

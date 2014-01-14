@@ -15,7 +15,6 @@ struct Config
 
     struct
     {
-        int enableX11;
         int fullscreen, centre, xpos, ypos, width, height;
     } window;
 

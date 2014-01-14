@@ -23,7 +23,6 @@ HWND        hWnd = 0;
 char        *screenDirectory;
 u32         last_good_ucode = (u32) -1;
 void        (*CheckInterrupts)( void );
-char        configdir[PATH_MAX] = {0};
 void        (*renderCallback)() = NULL;
 
 /* definitions of pointers to Core config functions */
@@ -438,7 +437,6 @@ EXPORT void CALL ReadScreen (void **dest, int *width, int *height)
 
 EXPORT void CALL SetConfigDir (char *configDir)
 {
-    strncpy(configdir, configDir, PATH_MAX);
 }
 
 

@@ -393,21 +393,18 @@ int oneshot_hack = 0;
 
 #endif
 
-#define screen_width 854
-#define screen_height 480
-
 bool OGL_Start()
 {
 
 	if(CoreVideo_Init() != M64ERR_SUCCESS)
 	{
-        //DebugMessage(M64MSG_ERROR,"CoreVideo_Init failed.");
+        	DebugMessage(M64MSG_ERROR,"CoreVideo_Init failed.");
 		return false;
 	}
-    
-	if(CoreVideo_SetVideoMode(screen_width, screen_height, 32, M64VIDEO_FULLSCREEN, M64VIDEOFLAG_SUPPORT_RESIZING) != M64ERR_SUCCESS)
+    	
+	if(CoreVideo_SetVideoMode(config.screen.width, config.screen.height, 32, config.window.fullscreen ? M64VIDEO_FULLSCREEN : M64VIDEO_WINDOWED, M64VIDEOFLAG_SUPPORT_RESIZING) != M64ERR_SUCCESS)
 	{
-		//DebugMessage(M64MSG_ERROR,"CoreVideo_SetVideoMode failed.");
+		DebugMessage(M64MSG_ERROR,"CoreVideo_SetVideoMode failed.");
 		return false;
 	}
 #if 0
@@ -420,8 +417,8 @@ bool OGL_Start()
 
 	bcm_host_init();
 
-	uint32_t screen_width;
-    uint32_t screen_height;
+	uint32_t config.screen.width;
+    uint32_t config.screen.height;
 
     GLint   success;
 
@@ -475,7 +472,7 @@ bool OGL_Start()
    }
 
    // create an EGL window surface
-   success = graphics_get_display_size(0 /* LCD */, &screen_width, &screen_height);
+   success = graphics_get_display_size(0 /* LCD */, &config.screen.width, &config.screen.height);
    if (success < 0){
         LOG(LOG_ERROR, "graphics_get_display_size failed: %d \n", success);
         return FALSE;
@@ -483,13 +480,13 @@ bool OGL_Start()
 
    dst_rect.x = 0;
    dst_rect.y = 0;
-   dst_rect.width = screen_width;
-   dst_rect.height = screen_height;
+   dst_rect.width = config.screen.width;
+   dst_rect.height = config.screen.height;
       
    src_rect.x = 0;
    src_rect.y = 0;
-   src_rect.width = screen_width << 16;
-   src_rect.height = screen_height << 16;        
+   src_rect.width = config.screen.width << 16;
+   src_rect.height = config.screen.height << 16;        
 
    dispman_display = vc_dispmanx_display_open( 0 /* LCD */);
    dispman_update = vc_dispmanx_update_start( 0 );
@@ -499,8 +496,8 @@ bool OGL_Start()
       &src_rect, DISPMANX_PROTECTION_NONE, 0 /*alpha*/, 0/*clamp*/, (DISPMANX_TRANSFORM_T)0/*transform*/);
       
    nativewindow.element = dispman_element;
-   nativewindow.width = screen_width;
-   nativewindow.height = screen_height;
+   nativewindow.width = config.screen.width;
+   nativewindow.height = config.screen.height;
    vc_dispmanx_update_submit_sync( dispman_update );
       
    OGL.EGL.surface = eglCreateWindowSurface( OGL.EGL.display, OGL.EGL.config, &nativewindow, NULL );
@@ -523,7 +520,7 @@ bool OGL_Start()
     OGL_InitStates();
 
     //clear back buffer:
-    glViewport(0, 0, screen_width, screen_height);
+    glViewport(0, 0, config.screen.width, config.screen.height);
     glClearDepthf(0.0);
     glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -546,9 +543,9 @@ bool OGL_Start()
         glGenRenderbuffers(1, &OGL.framebuffer.depth_buffer);
         glGenTextures(1, &OGL.framebuffer.color_buffer);
         glBindRenderbuffer(GL_RENDERBUFFER, OGL.framebuffer.depth_buffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24_OES, screen_width, screen_height);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24_OES, config.screen.width, config.screen.height);
         glBindTexture(GL_TEXTURE_2D, OGL.framebuffer.color_buffer);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, screen_width, screen_height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, config.screen.width, config.screen.height, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
         glBindFramebuffer(GL_FRAMEBUFFER, OGL.framebuffer.fb);
         //glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, OGL.framebuffer.color_buffer, 0);
         //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, OGL.framebuffer.depth_buffer);
@@ -593,7 +590,7 @@ bool OGL_Start()
 
     //Print some info
     EGLint attrib;
-    LOG(LOG_MINIMAL, "Width: %i Height:%i \n", screen_width, screen_height);
+    LOG(LOG_MINIMAL, "Width: %i Height:%i \n", config.screen.width, config.screen.height);
     //eglGetConfigAttrib(OGL.EGL.display, OGL.EGL.config, EGL_DEPTH_SIZE, &attrib);
     LOG(LOG_MINIMAL, "[gles2n64]: Depth Size: %i \n", attrib);
     //eglGetConfigAttrib(OGL.EGL.display, OGL.EGL.config, EGL_BUFFER_SIZE, &attrib);
