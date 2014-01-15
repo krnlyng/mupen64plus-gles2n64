@@ -65,7 +65,7 @@ static void *l_DebugCallContext = NULL;
 /* Global functions */
 void DebugMessage(int level, const char *message, ...)
 {
-  char msgbuf[1024];
+  char msgbuf[4096];
   va_list args;
 
   if (l_DebugCallback == NULL)
