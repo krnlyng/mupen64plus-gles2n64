@@ -402,7 +402,7 @@ bool OGL_Start()
 		return false;
 	}
     	
-	if(CoreVideo_SetVideoMode(config.screen.width, config.screen.height, 32, config.window.fullscreen ? M64VIDEO_FULLSCREEN : M64VIDEO_WINDOWED, M64VIDEOFLAG_SUPPORT_RESIZING) != M64ERR_SUCCESS)
+	if(CoreVideo_SetVideoMode(config.screen.width, config.screen.height, config.screen.bpp, config.window.fullscreen ? M64VIDEO_FULLSCREEN : M64VIDEO_WINDOWED, M64VIDEOFLAG_SUPPORT_RESIZING) != M64ERR_SUCCESS)
 	{
 		DebugMessage(M64MSG_ERROR,"CoreVideo_SetVideoMode failed.");
 		return false;

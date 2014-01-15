@@ -11,6 +11,7 @@ struct Config
     {
         int width, height;
         int flipVertical;
+	int bpp;
     } screen;
 
     struct

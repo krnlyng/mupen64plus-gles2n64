@@ -199,6 +199,7 @@ void Config_LoadConfig()
     ConfigSetDefaultBool(l_ConfigVideoGeneral, "Fullscreen", true, "Use fullscreen mode if True, or windowed mode if False");
     ConfigSetDefaultInt(l_ConfigVideoGeneral, "ScreenWidth", 640, "Width of output window or fullscreen width");
     ConfigSetDefaultInt(l_ConfigVideoGeneral, "ScreenHeight", 480, "Height of output window or fullscreen height");
+    ConfigSetDefaultInt(l_ConfigVideoGeneral, "ScreenBPP", 0, "Screen bits per Pixel");
     ConfigSetDefaultBool(l_ConfigVideoGeneral, "VerticalSync", false, "Use vertical sync if True, or not if False");
     // end set default options
 
@@ -206,6 +207,7 @@ void Config_LoadConfig()
     config.window.fullscreen = ConfigGetParamBool(l_ConfigVideoGeneral, "Fullscreen");
     config.screen.width = ConfigGetParamInt(l_ConfigVideoGeneral, "ScreenWidth");
     config.screen.height = ConfigGetParamInt(l_ConfigVideoGeneral, "ScreenHeight");
+    config.screen.bpp = ConfigGetParamInt(l_ConfigVideoGeneral, "ScreenBPP");
     config.verticalSync = ConfigGetParamBool(l_ConfigVideoGeneral, "VerticalSync");
     // end get settings
     // end Video-General Settings
