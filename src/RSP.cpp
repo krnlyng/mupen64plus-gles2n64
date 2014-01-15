@@ -197,6 +197,5 @@ void RSP_Init()
 
     DepthBuffer_Init();
     GBI_Init();
-    OGL_Start();
 }
 

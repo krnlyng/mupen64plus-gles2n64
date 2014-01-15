@@ -225,9 +225,7 @@ EXPORT BOOL CALL InitiateGFX (GFX_INFO Gfx_Info)
     Config_LoadConfig();
     Config_LoadRomConfig(Gfx_Info.HEADER);
 
-    OGL_Start();
-
-    return TRUE;
+    return OGL_Start();
 }
 
 EXPORT void CALL MoveScreen (int xpos, int ypos)
@@ -398,7 +396,6 @@ EXPORT void CALL SetStretchVideo(bool stretch)
 EXPORT void CALL StartGL()
 {
     DebugMessage(M64MSG_VERBOSE, "Hit StartGL");
-    OGL_Start();
 }
 
 EXPORT void CALL StopGL()
