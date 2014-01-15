@@ -4,7 +4,6 @@
 # include "winlnxdefs.h"
 #endif
 #include <math.h>
-#include "Common.h"
 #include "gles2N64.h"
 #include "OpenGL.h"
 #include "Debug.h"
@@ -141,7 +140,7 @@ void RSP_ProcessDList()
     gDPPipelineMode(G_PM_NPRIMITIVE);
 
 #ifdef PRINT_DISPLAYLIST
-    if ((RSP.DList%PRINT_DISPLAYLIST_NUM) == 0) LOG(LOG_VERBOSE, "BEGIN DISPLAY LIST %i \n", RSP.DList);
+    if ((RSP.DList%PRINT_DISPLAYLIST_NUM) == 0) DebugMessage(M64MSG_VERBOSE, "BEGIN DISPLAY LIST %i \n", RSP.DList);
 #endif
 
     while (!RSP.halt)
@@ -168,7 +167,7 @@ void RSP_ProcessDList()
 #endif
 
 #ifdef PRINT_DISPLAYLIST
-        if ((RSP.DList%PRINT_DISPLAYLIST_NUM) == 0) LOG(LOG_VERBOSE, "%s: w0=0x%x w1=0x%x\n", GBI_GetFuncName(GBI.current->type, RSP.cmd), w0, w1);
+        if ((RSP.DList%PRINT_DISPLAYLIST_NUM) == 0) DebugMessage(M64MSG_VERBOSE, "%s: w0=0x%x w1=0x%x\n", GBI_GetFuncName(GBI.current->type, RSP.cmd), w0, w1);
 #endif
 
         GBI.cmd[RSP.cmd]( w0, w1 );
@@ -179,7 +178,7 @@ void RSP_ProcessDList()
     }
 
 #ifdef PRINT_DISPLAYLIST
-        if ((RSP.DList%PRINT_DISPLAYLIST_NUM) == 0) LOG(LOG_VERBOSE, "END DISPLAY LIST %i \n", RSP.DList);
+        if ((RSP.DList%PRINT_DISPLAYLIST_NUM) == 0) DebugMessage(M64MSG_VERBOSE, "END DISPLAY LIST %i \n", RSP.DList);
 #endif
 
     RSP.busy = FALSE;

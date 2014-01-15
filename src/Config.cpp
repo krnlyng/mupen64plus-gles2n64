@@ -32,7 +32,6 @@
 
 #include "winlnxdefs.h"
 #include "Config.h"
-#include "Common.h"
 
 
 Config config;
@@ -143,18 +142,18 @@ config.romName[20] = '\0';
             break;
     }
 
-    LOG(LOG_MINIMAL, "Rom is %s\n", config.romPAL ? "PAL" : "NTSC");
+    DebugMessage(M64MSG_INFO, "Rom is %s",config.romPAL ? "PAL" : "NTSC");
 
     filename = ConfigGetSharedDataFilepath("gles2n64rom.conf");
     FILE *f = fopen(filename,"r");
     if (!f)
     {
-        LOG(LOG_MINIMAL, "Could not find %s Rom settings file, using global.\n", filename);
+        DebugMessage(M64MSG_INFO, "Could not find %s Rom settings file, using global.",filename);
         return;
     }
     else
     {
-        LOG(LOG_MINIMAL, "[gles2N64]: Searching %s Database for \"%s\" ROM\n", filename, config.romName);
+        DebugMessage(M64MSG_INFO, "[gles2N64]: Searching %s Database for \"%s\" ROM",filename, config.romName);
         bool isRom = false;
         while (!feof(f))
         {

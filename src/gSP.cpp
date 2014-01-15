@@ -1,7 +1,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "Common.h"
 #include "gles2N64.h"
 #include "Debug.h"
 #include "Types.h"
@@ -123,17 +122,17 @@ u32 __indexmap_getnew(u32 index, u32 num)
                 ind = __indexmap_findunused(num);
                 if (ind > VERTBUFF_SIZE)
                 {
-                    LOG(LOG_ERROR, "Could not allocate %i indices\n", num);
+                    DebugMessage(M64MSG_ERROR, "Could not allocate %i indices",num);
 
-                    LOG(LOG_VERBOSE, "indexmap=[");
+                    DebugMessage(M64MSG_VERBOSE, "indexmap=[");
                     for(int i=0;i<INDEXMAP_SIZE;i++)
-                        LOG(LOG_VERBOSE, "%i,", OGL.triangles.indexmap[i]);
-                    LOG(LOG_VERBOSE, "]\n");
+                        DebugMessage(M64MSG_VERBOSE, "%i,", OGL.triangles.indexmap[i]);
+                    DebugMessage(M64MSG_VERBOSE, "]");
 
-                    LOG(LOG_VERBOSE, "indexmapinv=[");
+                    DebugMessage(M64MSG_VERBOSE, "indexmapinv=[");
                     for(int i=0;i<VERTBUFF_SIZE;i++)
-                        LOG(LOG_VERBOSE, "%i,", OGL.triangles.indexmapinv[i]);
-                    LOG(LOG_VERBOSE, "]\n");
+                        DebugMessage(M64MSG_VERBOSE, "%i,", OGL.triangles.indexmapinv[i]);
+                    DebugMessage(M64MSG_VERBOSE, "]");
                 }
                 return ind;
             }
@@ -597,7 +596,7 @@ void gSPLoadUcodeEx( u32 uc_start, u32 uc_dstart, u16 uc_dsize )
     }
     else
     {
-        LOG(LOG_WARNING, "Unknown Ucode\n");
+        DebugMessage(M64MSG_WARNING, "Unknown Ucode");
     }
 }
 
@@ -687,7 +686,7 @@ void gSPViewport( u32 v )
     {
 #ifdef DEBUG
         DebugMsg( DEBUG_HIGH | DEBUG_ERROR, "// Attempting to load viewport from invalid address\n" );
-        DebugMsg( DEBUG_HIGH | DEBUG_HANDLED, "gSPViewport( 0x%08X );\n", v );
+        DebugMsg( DEBUG_HIGH | DEBUG_HANDLED, "gSPViewport( 0x%08X );",v );
 #endif
         return;
     }
@@ -851,7 +850,7 @@ void gSPVertex( u32 v, u32 n, u32 v0 )
     }
     else
     {
-        LOG(LOG_ERROR, "Using Vertex outside buffer v0=%i, n=%i\n", v0, n);
+        DebugMessage(M64MSG_ERROR, "Using Vertex outside buffer v0=%i, n=%i",v0, n);
     }
 
 }
@@ -944,7 +943,7 @@ void gSPCIVertex( u32 v, u32 n, u32 v0 )
     }
     else
     {
-        LOG(LOG_ERROR, "Using Vertex outside buffer v0=%i, n=%i\n", v0, n);
+        DebugMessage(M64MSG_ERROR, "Using Vertex outside buffer v0=%i, n=%i",v0, n);
     }
 
 }
@@ -1036,7 +1035,7 @@ void gSPDMAVertex( u32 v, u32 n, u32 v0 )
     }
     else
     {
-        LOG(LOG_ERROR, "Using Vertex outside buffer v0=%i, n=%i\n", v0, n);
+        DebugMessage(M64MSG_ERROR, "Using Vertex outside buffer v0=%i, n=%i",v0, n);
     }
 
 }

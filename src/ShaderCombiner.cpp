@@ -3,9 +3,10 @@
 #include "winlnxdefs.h"
 #include "OpenGL.h"
 #include "ShaderCombiner.h"
-#include "Common.h"
 #include "Textures.h"
 #include "Config.h"
+
+#include "gles2N64.h"
 
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
@@ -264,35 +265,35 @@ DecodedMux::DecodedMux(u64 mux, bool cycle2)
 
     //simplifying mux:
     if (replace(G_CYC_1CYCLE, LOD_FRACTION, ZERO) || replace(G_CYC_2CYCLE, LOD_FRACTION, ZERO))
-        LOG(LOG_VERBOSE, "SC Replacing LOD_FRACTION with ZERO\n");
+        DebugMessage(M64MSG_VERBOSE, "SC Replacing LOD_FRACTION with ZERO");
 #if 1
     if (replace(G_CYC_1CYCLE, K4, ZERO) || replace(G_CYC_2CYCLE, K4, ZERO))
-        LOG(LOG_VERBOSE, "SC Replacing K4 with ZERO\n");
+        DebugMessage(M64MSG_VERBOSE, "SC Replacing K4 with ZERO");
 
     if (replace(G_CYC_1CYCLE, K5, ZERO) || replace(G_CYC_2CYCLE, K5, ZERO))
-        LOG(LOG_VERBOSE, "SC Replacing K5 with ZERO\n");
+        DebugMessage(M64MSG_VERBOSE, "SC Replacing K5 with ZERO");
 #endif
 
     if (replace(G_CYC_1CYCLE, CENTER, ZERO) || replace(G_CYC_2CYCLE, CENTER, ZERO))
-        LOG(LOG_VERBOSE, "SC Replacing CENTER with ZERO\n");
+        DebugMessage(M64MSG_VERBOSE, "SC Replacing CENTER with ZERO");
 
     if (replace(G_CYC_1CYCLE, SCALE, ZERO) || replace(G_CYC_2CYCLE, SCALE, ZERO))
-        LOG(LOG_VERBOSE, "SC Replacing SCALE with ZERO\n");
+        DebugMessage(M64MSG_VERBOSE, "SC Replacing SCALE with ZERO");
 
     //Combiner has initial value of zero in cycle 0
     if (replace(G_CYC_1CYCLE, COMBINED, ZERO))
-        LOG(LOG_VERBOSE, "SC Setting CYCLE1 COMBINED to ZERO\n");
+        DebugMessage(M64MSG_VERBOSE, "SC Setting CYCLE1 COMBINED to ZERO");
 
     if (replace(G_CYC_1CYCLE, COMBINED_ALPHA, ZERO))
-        LOG(LOG_VERBOSE, "SC Setting CYCLE1 COMBINED_ALPHA to ZERO\n");
+        DebugMessage(M64MSG_VERBOSE, "SC Setting CYCLE1 COMBINED_ALPHA to ZERO");
 
     if (!config.enableNoise)
     {
         if (replace(G_CYC_1CYCLE, NOISE, ZERO))
-            LOG(LOG_VERBOSE, "SC Setting CYCLE1 NOISE to ZERO\n");
+            DebugMessage(M64MSG_VERBOSE, "SC Setting CYCLE1 NOISE to ZERO");
 
         if (replace(G_CYC_2CYCLE, NOISE, ZERO))
-            LOG(LOG_VERBOSE, "SC Setting CYCLE2 NOISE to ZERO\n");
+            DebugMessage(M64MSG_VERBOSE, "SC Setting CYCLE2 NOISE to ZERO");
 
     }
 
@@ -410,7 +411,7 @@ void _glcompiler_error(GLint shader)
     log = (char*) malloc(len + 1);
     glGetShaderInfoLog(shader, len, &i, log);
     log[len] = 0;
-    LOG(LOG_ERROR, "COMPILE ERROR: %s \n", log);
+    DebugMessage(M64MSG_ERROR, "COMPILE ERROR: %s ",log);
     free(log);
 }
 
@@ -423,7 +424,7 @@ void _gllinker_error(GLint program)
     log = (char*) malloc(len + 1);
     glGetProgramInfoLog(program, len, &i, log);
     log[len] = 0;
-    LOG(LOG_ERROR, "LINK ERROR: %s \n", log);
+    DebugMessage(M64MSG_ERROR, "LINK ERROR: %s ",log);
     free(log);
 };
 
@@ -591,11 +592,11 @@ void ShaderCombiner_Init()
     str += sprintf(str, "}\n\n");
 
 #ifdef PRINT_SHADER
-    LOG(LOG_VERBOSE, "=============================================================\n");
-    LOG(LOG_VERBOSE, "Vertex Shader:\n");
-    LOG(LOG_VERBOSE, "=============================================================\n");
-    LOG(LOG_VERBOSE, "%s", buff);
-    LOG(LOG_VERBOSE, "=============================================================\n");
+    DebugMessage(M64MSG_VERBOSE, "=============================================================");
+    DebugMessage(M64MSG_VERBOSE, "Vertex Shader:");
+    DebugMessage(M64MSG_VERBOSE, "=============================================================");
+    DebugMessage(M64MSG_VERBOSE, "%s", buff);
+    DebugMessage(M64MSG_VERBOSE, "=============================================================");
 #endif
 
     src[0] = buff;
@@ -786,12 +787,12 @@ ShaderProgram *ShaderCombiner_Compile(DecodedMux *dmux, int flags)
     *buffer = 0;
 
 #ifdef PRINT_SHADER
-    LOG(LOG_VERBOSE, "=============================================================\n");
-    LOG(LOG_VERBOSE, "Combine=0x%llx flags=0x%x dmux flags=0x%x\n", prog->combine.mux, flags, dmux->flags);
-    LOG(LOG_VERBOSE, "Num=%i \t usesT0=%i usesT1=%i usesCol=%i usesNoise=%i\n", scProgramCount, prog->usesT0, prog->usesT1, prog->usesCol, prog->usesNoise);
-    LOG(LOG_VERBOSE, "=============================================================\n");
-    LOG(LOG_VERBOSE, "%s", frag);
-    LOG(LOG_VERBOSE, "=============================================================\n");
+    DebugMessage(M64MSG_VERBOSE, "=============================================================");
+    DebugMessage(M64MSG_VERBOSE, "Combine=0x%llx flags=0x%x dmux flags=0x%x",prog->combine.mux, flags, dmux->flags);
+    DebugMessage(M64MSG_VERBOSE, "Num=%i \t usesT0=%i usesT1=%i usesCol=%i usesNoise=%i",scProgramCount, prog->usesT0, prog->usesT1, prog->usesCol, prog->usesNoise);
+    DebugMessage(M64MSG_VERBOSE, "=============================================================");
+    DebugMessage(M64MSG_VERBOSE, "%s", frag);
+    DebugMessage(M64MSG_VERBOSE, "=============================================================");
 #endif
 
     prog->program = glCreateProgram();

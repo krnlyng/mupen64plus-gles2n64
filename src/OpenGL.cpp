@@ -29,7 +29,6 @@
 
 #include "m64p_vidext.h"
 
-#include "Common.h"
 #include "winlnxdefs.h"
 #include "gles2N64.h"
 #include "OpenGL.h"
@@ -202,7 +201,7 @@ void OGL_InitStates()
     glViewport(config.framebuffer.xpos, config.framebuffer.ypos, config.framebuffer.width, config.framebuffer.height);
 
     //create default shader program
-    LOG(LOG_MINIMAL, "Generate Default Shader Program.\n");
+    DebugMessage(M64MSG_INFO, "Generate Default Shader Program.");
 
     const char *src[1];
     src[0] = _default_fsh;
@@ -212,7 +211,7 @@ void OGL_InitStates()
     glGetShaderiv(OGL.defaultFragShader, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        LOG(LOG_ERROR, "Failed to produce default fragment shader.\n");
+        DebugMessage(M64MSG_ERROR, "Failed to produce default fragment shader.");
     }
 
     src[0] = _default_vsh;
@@ -222,7 +221,7 @@ void OGL_InitStates()
     glGetShaderiv(OGL.defaultVertShader, GL_COMPILE_STATUS, &success);
     if (!success)
     {
-        LOG(LOG_ERROR, "Failed to produce default vertex shader.\n");
+        DebugMessage(M64MSG_ERROR, "Failed to produce default vertex shader.");
         _glcompiler_error(OGL.defaultVertShader);
     }
 
@@ -235,12 +234,12 @@ void OGL_InitStates()
     glGetProgramiv(OGL.defaultProgram, GL_LINK_STATUS, &success);
     if (!success)
     {
-        LOG(LOG_ERROR, "Failed to link default program.\n");
+        DebugMessage(M64MSG_ERROR, "Failed to link default program.");
         _glcompiler_error(OGL.defaultFragShader);
     }
     glUniform1i(glGetUniformLocation(OGL.defaultProgram, "uTex"), 0);
     glUseProgram(OGL.defaultProgram);
-    LOG(LOG_MINIMAL, "shader creation done.\n");
+    DebugMessage(M64MSG_INFO, "shader creation done.");
 }
 
 void OGL_UpdateScale()
@@ -262,26 +261,26 @@ bool OGL_SDL_Start()
     const SDL_VideoInfo *videoInfo;
 
     /* Initialize SDL */
-    LOG(LOG_VERBOSE, "Initializing SDL video subsystem...\n" );
+    DebugMessage(M64MSG_VERBOSE, "Initializing SDL video subsystem...\n" );
     if (SDL_InitSubSystem( SDL_INIT_VIDEO ) == -1)
     {
-        printf( "Error initializing SDL video subsystem: %s\n", SDL_GetError() );
+        DebugMessage(M64MSG_VERBOSE,  "Error initializing SDL video subsystem: %s",SDL_GetError() );
         return FALSE;
     }
 
     /* Video Info */
-    LOG(LOG_VERBOSE,"Getting video info...\n" );
+    DebugMessage(M64MSG_VERBOSE,"Getting video info...\n" );
     if (!(videoInfo = SDL_GetVideoInfo()))
     {
-        LOG(LOG_VERBOSE,"Video query failed: %s\n", SDL_GetError() );
+        DebugMessage(M64MSG_VERBOSE,"Video query failed: %s",SDL_GetError() );
         SDL_QuitSubSystem( SDL_INIT_VIDEO );
         return FALSE;
     }
     /* Set the video mode */
-    LOG(LOG_VERBOSE, "Setting video mode %dx%d...\n", (int)OGL.winWidth, (int)OGL.winHeight );
+    DebugMessage(M64MSG_VERBOSE, "Setting video mode %dx%d...",(int)OGL.winWidth, (int)OGL.winHeight );
     if (!(OGL.hScreen = SDL_SetVideoMode( OGL.winWidth, OGL.winHeight - 32, 16, SDL_SWSURFACE )))
     {
-        LOG(LOG_ERROR, "Problem setting videomode %dx%d: %s\n", (int)OGL.winWidth, (int)OGL.winHeight, SDL_GetError() );
+        DebugMessage(M64MSG_ERROR, "Problem setting videomode %dx%d: %s",(int)OGL.winWidth, (int)OGL.winHeight, SDL_GetError() );
         SDL_QuitSubSystem( SDL_INIT_VIDEO );
         return FALSE;
     }
@@ -299,7 +298,7 @@ bool OGL_SDL_Start()
 
 bool OGL_X11_Start()
 {
-	LOG(LOG_MINIMAL, "Starting X11 Window\n");
+	LOG(M64MSG_INFO, "Starting X11 Window");
 
 	Window window;
 	Display *display;
@@ -309,7 +308,7 @@ bool OGL_X11_Start()
 
 	display = XOpenDisplay(NULL);
     if (!display) {
-        LOG(LOG_ERROR, "Cannot connect to X server\n");
+        DebugMessage(M64MSG_ERROR, "Cannot connect to X server");
 		return false;
     }
 
@@ -356,7 +355,7 @@ bool OGL_X11_Start()
     int black = BlackPixel(display, DefaultScreen(display));
 	window = XCreateSimpleWindow(display, DefaultRootWindow(display), x, y, w, h, 0, black, black);
 	if (!window){
-        LOG(LOG_ERROR, "Failed to create X window\n");
+        DebugMessage(M64MSG_ERROR, "Failed to create X window");
 		return false;
     }
 
@@ -446,19 +445,19 @@ bool OGL_Start()
 	 // get an EGL display connection
    OGL.EGL.display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
    if (OGL.EGL.display == EGL_NO_DISPLAY){
-        LOG(LOG_ERROR, "EGL Display Get failed: %s \n", EGLErrorString());
+        DebugMessage(M64MSG_ERROR, "EGL Display Get failed: %s ",EGLErrorString());
         return FALSE;
    }
 
    // initialize the EGL display connection
    if (!eglInitialize(OGL.EGL.display, NULL, NULL)){
-        LOG(LOG_ERROR, "EGL Display Initialize failed: %s \n", EGLErrorString());
+        DebugMessage(M64MSG_ERROR, "EGL Display Initialize failed: %s ",EGLErrorString());
         return FALSE;
     }
 
    // get an appropriate EGL frame buffer configuration
    if (!eglChooseConfig(OGL.EGL.display, attribute_list, &OGL.EGL.config, 1, &num_config)){
-        LOG(LOG_ERROR, "EGL Configuration failed: %s \n", EGLErrorString());
+        DebugMessage(M64MSG_ERROR, "EGL Configuration failed: %s ",EGLErrorString());
         return FALSE;
     }
 
@@ -467,14 +466,14 @@ bool OGL_Start()
 
    OGL.EGL.context = eglCreateContext(OGL.EGL.display, OGL.EGL.config, EGL_NO_CONTEXT, NULL);
    if (OGL.EGL.context == EGL_NO_CONTEXT){
-        LOG(LOG_ERROR, "EGL Context Creation failed: %s \n", EGLErrorString());
+        DebugMessage(M64MSG_ERROR, "EGL Context Creation failed: %s ",EGLErrorString());
         return FALSE;
    }
 
    // create an EGL window surface
    success = graphics_get_display_size(0 /* LCD */, &config.screen.width, &config.screen.height);
    if (success < 0){
-        LOG(LOG_ERROR, "graphics_get_display_size failed: %d \n", success);
+        DebugMessage(M64MSG_ERROR, "graphics_get_display_size failed: %d ",success);
         return FALSE;
    }
 
@@ -502,14 +501,14 @@ bool OGL_Start()
       
    OGL.EGL.surface = eglCreateWindowSurface( OGL.EGL.display, OGL.EGL.config, &nativewindow, NULL );
    if (OGL.EGL.surface == EGL_NO_SURFACE){
-        LOG(LOG_ERROR, "EGL surface Creation failed: %s \n", EGLErrorString());
+        DebugMessage(M64MSG_ERROR, "EGL surface Creation failed: %s ",EGLErrorString());
         return FALSE;
    }
 
 
    // connect the context to the surface
    if (!eglMakeCurrent(OGL.EGL.display, OGL.EGL.surface, OGL.EGL.surface, OGL.EGL.context)){
-        LOG(LOG_ERROR, "EGL Make Current failed: %s \n", EGLErrorString());
+        DebugMessage(M64MSG_ERROR, "EGL Make Current failed: %s ",EGLErrorString());
         return FALSE;
     };   
 #endif
@@ -533,10 +532,10 @@ bool OGL_Start()
         //create framebuffer
     if (config.framebuffer.enable)
     {
-        LOG(LOG_VERBOSE, "Create offscreen framebuffer. \n");
+        DebugMessage(M64MSG_VERBOSE, "Create offscreen framebuffer. ");
         if (1==1)
         {
-            LOG(LOG_WARNING, "There's no point in using a offscreen framebuffer when the window and screen dimensions are the same\n");
+            DebugMessage(M64MSG_WARNING, "There's no point in using a offscreen framebuffer when the window and screen dimensions are the same");
         }
 
         glGenFramebuffers(1, &OGL.framebuffer.fb);
@@ -554,18 +553,18 @@ bool OGL_Start()
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         {
-            LOG(LOG_ERROR, "Incomplete Framebuffer Object: ");
+            DebugMessage(M64MSG_ERROR, "Incomplete Framebuffer Object: ");
             switch(glCheckFramebufferStatus(GL_FRAMEBUFFER))
             {
                 case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                    printf("Incomplete Attachment. \n"); break;
+                    DebugMessage(M64MSG_VERBOSE, "Incomplete Attachment. "); break;
                 case GL_FRAMEBUFFER_UNSUPPORTED:
-                    printf("Framebuffer Unsupported. \n"); break;
+                    DebugMessage(M64MSG_VERBOSE, "Framebuffer Unsupported. "); break;
                 case GL_FRAMEBUFFER_INCOMPLETE_DIMENSIONS:
-                    printf("Incomplete Dimensions. \n"); break;
+                    DebugMessage(M64MSG_VERBOSE, "Incomplete Dimensions. "); break;
                 /* tin0scode: not found/needed 
         /case GL_FRAMEBUFFER_INCOMPLETE_FORMATS:
-                    printf("Incomplete Formats. \n"); break;*/
+                    DebugMessage(M64MSG_VERBOSE, "Incomplete Formats. "); break;*/
             }
             config.framebuffer.enable = 0;
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -576,7 +575,7 @@ bool OGL_Start()
     //check extensions
     if ((config.texture.maxAnisotropy>0) && !OGL_IsExtSupported("GL_EXT_texture_filter_anistropic"))
     {
-        LOG(LOG_WARNING, "Anistropic Filtering is not supported.\n");
+        DebugMessage(M64MSG_WARNING, "Anistropic Filtering is not supported.");
         config.texture.maxAnisotropy = 0;
     }
 
@@ -584,18 +583,18 @@ bool OGL_Start()
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &f);
     if (config.texture.maxAnisotropy > ((int)f))
     {
-        LOG(LOG_WARNING, "Clamping max anistropy to %ix.\n", (int)f);
+        DebugMessage(M64MSG_WARNING, "Clamping max anistropy to %ix.",(int)f);
         config.texture.maxAnisotropy = (int)f;
     }
 
     //Print some info
     EGLint attrib;
-    LOG(LOG_MINIMAL, "Width: %i Height:%i \n", config.screen.width, config.screen.height);
+    DebugMessage(M64MSG_INFO, "Width: %i Height:%i ",config.screen.width, config.screen.height);
     //eglGetConfigAttrib(OGL.EGL.display, OGL.EGL.config, EGL_DEPTH_SIZE, &attrib);
-    LOG(LOG_MINIMAL, "[gles2n64]: Depth Size: %i \n", attrib);
+    DebugMessage(M64MSG_INFO, "[gles2n64]: Depth Size: %i ",attrib);
     //eglGetConfigAttrib(OGL.EGL.display, OGL.EGL.config, EGL_BUFFER_SIZE, &attrib);
-    LOG(LOG_MINIMAL, "[gles2n64]: Color Buffer Size: %i \n", attrib);
-    LOG(LOG_MINIMAL, "[gles2n64]: Enable Runfast... \n");
+    DebugMessage(M64MSG_INFO, "[gles2n64]: Color Buffer Size: %i ",attrib);
+    DebugMessage(M64MSG_INFO, "[gles2n64]: Enable Runfast... ");
 
     OGL_EnableRunfast();
     OGL_UpdateScale();
@@ -624,14 +623,14 @@ bool OGL_Start()
     VI.displayNum = 0;
     glGetError();
 
-    printf("RPIDBG: out of OGL_Start\n");
+    DebugMessage(M64MSG_VERBOSE, "RPIDBG: out of OGL_Start");
 
     return TRUE;
 }
 
 void OGL_Stop()
 {
-    LOG(LOG_MINIMAL, "Stopping OpenGL\n");
+    DebugMessage(M64MSG_INFO, "Stopping OpenGL");
 
 #ifdef WIN32
     SDL_QuitSubSystem( SDL_INIT_VIDEO );
@@ -1009,7 +1008,7 @@ void OGL_UpdateStates()
                     break;
 
                 default:
-                    LOG(LOG_VERBOSE, "Unhandled blend mode=%x", gDP.otherMode.l >> 16);
+                    DebugMessage(M64MSG_VERBOSE, "Unhandled blend mode=%x", gDP.otherMode.l >> 16);
                     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
                     break;
             }
@@ -1377,12 +1376,12 @@ void OGL_ClearColorBuffer( float *color )
 
 static void OGL_png_error(png_structp png_write, const char *message)
 {
-    printf("PNG Error: %s\n", message);
+    DebugMessage(M64MSG_VERBOSE, "PNG Error: %s",message);
 }
 
 static void OGL_png_warn(png_structp png_write, const char *message)
 {
-    printf("PNG Warning: %s\n", message);
+    DebugMessage(M64MSG_VERBOSE, "PNG Warning: %s",message);
 }
 
 void OGL_SaveScreenshot()
@@ -1399,7 +1398,7 @@ void OGL_SaveScreenshot()
     int i;
     for (i = 0; i < 100; i++)
     {
-        sprintf(filename, "%s_%03i.png", filepath, i);
+        sDebugMessage(M64MSG_VERBOSE, filename, "%s_%03i.png", filepath, i);
         FILE *pFile = fopen(filename, "r");
         if (pFile == NULL)
             break;
@@ -1410,28 +1409,28 @@ void OGL_SaveScreenshot()
     png_structp png_write = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, OGL_png_error, OGL_png_warn);
     if (!png_write)
     {
-        printf("Error creating PNG write struct.\n");
+        DebugMessage(M64MSG_VERBOSE, "Error creating PNG write struct.");
         return;
     }
     png_infop png_info = png_create_info_struct(png_write);
     if (!png_info)
     {
         png_destroy_write_struct(&png_write, (png_infopp)NULL);
-        printf("Error creating PNG info struct.\n");
+        DebugMessage(M64MSG_VERBOSE, "Error creating PNG info struct.");
         return;
     }
     // Set the jumpback
     if (setjmp(png_jmpbuf(png_write)))
     {
         png_destroy_write_struct(&png_write, &png_info);
-        printf("Error calling setjmp()\n");
+        DebugMessage(M64MSG_VERBOSE, "Error calling setjmp()");
         return;
     }
     // open the file to write
     FILE *savefile = fopen(filename, "wb");
     if (savefile == NULL)
     {
-        printf("Error opening '%s' to save screenshot.\n", filename);
+        DebugMessage(M64MSG_VERBOSE, "Error opening '%s' to save screenshot.",filename);
         return;
     }
     // give the file handle to the PNG compressor
@@ -1470,15 +1469,15 @@ int OGL_CheckError()
     GLenum e = glGetError();
     if (e != GL_NO_ERROR)
     {
-        printf("GL Error: ");
+        DebugMessage(M64MSG_VERBOSE, "GL Error: ");
         switch(e)
         {
-            case GL_INVALID_ENUM:   printf("INVALID ENUM"); break;
-            case GL_INVALID_VALUE:  printf("INVALID VALUE"); break;
-            case GL_INVALID_OPERATION:  printf("INVALID OPERATION"); break;
-            case GL_OUT_OF_MEMORY:  printf("OUT OF MEMORY"); break;
+            case GL_INVALID_ENUM:   DebugMessage(M64MSG_VERBOSE, "INVALID ENUM"); break;
+            case GL_INVALID_VALUE:  DebugMessage(M64MSG_VERBOSE, "INVALID VALUE"); break;
+            case GL_INVALID_OPERATION:  DebugMessage(M64MSG_VERBOSE, "INVALID OPERATION"); break;
+            case GL_OUT_OF_MEMORY:  DebugMessage(M64MSG_VERBOSE, "OUT OF MEMORY"); break;
         }
-        printf("\n");
+        DebugMessage(M64MSG_VERBOSE, "");
         return 1;
     }
     return 0;
@@ -1506,28 +1505,28 @@ void OGL_SwapBuffers()
     {
 
         float fps = 1000.0f * (float) frames / (ticks - lastTicks);
-        LOG(LOG_MINIMAL, "fps = %.2f \n", fps);
-        LOG(LOG_MINIMAL, "skipped frame = %i of %i \n", OGL.frameSkipped, frames + OGL.frameSkipped);
+        DebugMessage(M64MSG_INFO, "fps = %.2f ",fps);
+        DebugMessage(M64MSG_INFO, "skipped frame = %i of %i ",OGL.frameSkipped, frames + OGL.frameSkipped);
 
         OGL.frameSkipped = 0;
 
 #ifdef BATCH_TEST
-        LOG(LOG_MINIMAL, "time spent in draw calls per frame = %.2f ms\n", (float)TotalDrawTime / frames);
-        LOG(LOG_MINIMAL, "average draw calls per frame = %.0f\n", (float)TotalDrawCalls / frames);
-        LOG(LOG_MINIMAL, "average vertices per draw call = %.2f\n", (float)TotalTriangles / TotalDrawCalls);
+        DebugMessage(M64MSG_INFO, "time spent in draw calls per frame = %.2f ms",(float)TotalDrawTime / frames);
+        DebugMessage(M64MSG_INFO, "average draw calls per frame = %.0f",(float)TotalDrawCalls / frames);
+        DebugMessage(M64MSG_INFO, "average vertices per draw call = %.2f",(float)TotalTriangles / TotalDrawCalls);
         TotalDrawCalls = 0;
         TotalTriangles = 0;
         TotalDrawTime = 0;
 #endif
 
 #ifdef SHADER_TEST
-        LOG(LOG_MINIMAL, "average shader changes per frame = %f\n", (float)ProgramSwaps / frames);
+        DebugMessage(M64MSG_INFO, "average shader changes per frame = %f",(float)ProgramSwaps / frames);
         ProgramSwaps = 0;
 #endif
 
 #ifdef TEXTURECACHE_TEST
-        LOG(LOG_MINIMAL, "texture cache time per frame: %.2f ms\n", (float)TextureCacheTime/ frames);
-        LOG(LOG_MINIMAL, "texture cache per frame: hits=%.2f misses=%.2f\n", (float)cache.hits / frames,
+        DebugMessage(M64MSG_INFO, "texture cache time per frame: %.2f ms",(float)TextureCacheTime/ frames);
+        DebugMessage(M64MSG_INFO, "texture cache per frame: hits=%.2f misses=%.2f",(float)cache.hits / frames,
                 (float)cache.misses / frames);
         cache.hits = cache.misses = 0;
         TextureCacheTime = 0;
@@ -1543,10 +1542,10 @@ void OGL_SwapBuffers()
     static u32 profileLastTicks = 0;
     if (profileTicks >= (profileLastTicks + 5000))
     {
-        LOG(LOG_MINIMAL, "GBI PROFILE DATA: %i ms \n", profileTicks - profileLastTicks);
-        LOG(LOG_MINIMAL, "=========================================================\n");
+        DebugMessage(M64MSG_INFO, "GBI PROFILE DATA: %i ms ",profileTicks - profileLastTicks);
+        DebugMessage(M64MSG_INFO, "=========================================================");
         GBI_ProfilePrint(stdout);
-        LOG(LOG_MINIMAL, "=========================================================\n");
+        DebugMessage(M64MSG_INFO, "=========================================================");
         GBI_ProfileReset();
         profileLastTicks = profileTicks;
     }
@@ -1621,7 +1620,7 @@ void OGL_SwapBuffers()
 void OGL_ReadScreen( void *dest, int *width, int *height )
 {
 
-    printf("READ SCREEN!\n");
+    DebugMessage(M64MSG_VERBOSE, "READ SCREEN!");
 
 #if 0
     void *rgba = malloc( OGL.winWidth * OGL.winHeight * 4 );

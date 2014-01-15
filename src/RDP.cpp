@@ -4,8 +4,9 @@
 #include "gDP.h"
 #include "Types.h"
 #include "Debug.h"
-#include "Common.h"
 #include "gSP.h"
+
+#include "gles2N64.h"
 
 void RDP_Unknown( u32 w0, u32 w1 )
 {
@@ -254,42 +255,42 @@ void RDP_TexRect( u32 w0, u32 w1 )
 //Low Level RDP Drawing Commands:
 void RDP_TriFill(u32 w0, u32 w1)
 {
-    LOG(LOG_VERBOSE, "RSP_TRI_FILL Command\n");
+    DebugMessage(M64MSG_VERBOSE, "RSP_TRI_FILL Command");
 }
 
 void RDP_TriFillZBuff(u32 w0, u32 w1)
 {
-    LOG(LOG_VERBOSE, "RSP_TRI_FILL_ZBUFF Command\n");
+    DebugMessage(M64MSG_VERBOSE, "RSP_TRI_FILL_ZBUFF Command");
 }
 
 void RDP_TriTxtr(u32 w0, u32 w1)
 {
-    LOG(LOG_VERBOSE, "RSP_TRI_TXTR Command\n");
+    DebugMessage(M64MSG_VERBOSE, "RSP_TRI_TXTR Command");
 }
 
 void RDP_TriTxtrZBuff(u32 w0, u32 w1)
 {
-    LOG(LOG_VERBOSE, "RSP_TRI_TXTR_ZBUFF Command\n");
+    DebugMessage(M64MSG_VERBOSE, "RSP_TRI_TXTR_ZBUFF Command");
 }
 
 void RDP_TriShade(u32 w0, u32 w1)
 {
-    LOG(LOG_VERBOSE, "RSP_TRI_SHADE Command\n");
+    DebugMessage(M64MSG_VERBOSE, "RSP_TRI_SHADE Command");
 }
 
 void RDP_TriShadeZBuff(u32 w0, u32 w1)
 {
-    LOG(LOG_VERBOSE, "RSP_TRI_SHADE_ZBUFF Command\n");
+    DebugMessage(M64MSG_VERBOSE, "RSP_TRI_SHADE_ZBUFF Command");
 }
 
 void RDP_TriShadeTxtr(u32 w0, u32 w1)
 {
-    LOG(LOG_VERBOSE, "RSP_TRI_SHADE_TXTR Command\n");
+    DebugMessage(M64MSG_VERBOSE, "RSP_TRI_SHADE_TXTR Command");
 }
 
 void RDP_TriShadeTxtrZBuff(u32 w0, u32 w1)
 {
-    LOG(LOG_VERBOSE, "RSP_TRI_SHADE_TXTR_ZBUFF Command\n");
+    DebugMessage(M64MSG_VERBOSE, "RSP_TRI_SHADE_TXTR_ZBUFF Command");
 }
 
 void RDP_Init()

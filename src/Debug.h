@@ -1,7 +1,7 @@
 #if !defined( DEBUG_H ) && defined( DEBUG )
 #define DEBUG_H
 
-#include <stdio.h>
+#include "gles2N64.h"
 
 #define     DEBUG_LOW       0x1000
 #define     DEBUG_MEDIUM    0x2000
@@ -23,7 +23,7 @@
 #define CloseDebugDlg()
 #define StartDump(filename)
 #define EndDump()
-#define DebugMsg(type, format, ... )  printf(format, ## __VA_ARGS__)
+#define DebugMsg(type, format, ... )  DebugMessage(M64MSG_STATUS, format, ## __VA_ARGS__)
 #define DebugRSPState(pci, pc, cmd, w0, w1)
 
 #endif // DEBUG_H

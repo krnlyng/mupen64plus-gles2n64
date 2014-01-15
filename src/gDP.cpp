@@ -415,10 +415,9 @@ void gDPSetColorImage( u32 format, u32 size, u32 width, u32 address )
 #if 0
         if (OGL.renderingToTexture)
         {
-            printf("start=%i end=%i\n", start, end);
-            printf("display=");
-            for(int i=0; i< VI.displayNum; i++) printf("%i,%i:", VI.display[i].start, VI.display[i].end);
-            printf("\n");
+            DebugMessage(M64MSG_VERBOSE, "start=%i end=%i\n", start, end);
+            DebugMessage(M64MSG_VERBOSE, "display=");
+            for(int i=0; i< VI.displayNum; i++) DebugMessage(M64MSG_VERBOSE, "%i,%i:", VI.display[i].start, VI.display[i].end);
         }
 #endif
     }

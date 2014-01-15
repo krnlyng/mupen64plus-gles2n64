@@ -10,7 +10,6 @@
 
 #include "GLES/gl.h"
                                      
-#include "Common.h"
 #include "Config.h"
 #include "OpenGL.h"
 #include "Textures.h"
@@ -30,6 +29,9 @@
 #define FORMAT_RGBA4444 3
 #define FORMAT_RGBA5551 4
 #define FORMAT_RGBA8888 5
+
+
+#include "gles2N64.h"
 
 //#define PRINT_TEXTUREFORMAT
 
@@ -612,12 +614,12 @@ void TextureCache_LoadBackground( CachedTexture *texInfo )
     __texture_format(texInfo->size, texInfo->format, &texFormat);
 
 #ifdef PRINT_TEXTUREFORMAT
-    printf("BG LUT=%i, TEXTURE SIZE=%i, FORMAT=%i -> GL FORMAT=%i\n", gDP.otherMode.textureLUT, texInfo->size, texInfo->format, texFormat.format); fflush(stdout);
+    DebugMessage(M64MSG_VERBOSE, "BG LUT=%i, TEXTURE SIZE=%i, FORMAT=%i -> GL FORMAT=%i",gDP.otherMode.textureLUT, texInfo->size, texInfo->format, texFormat.format); fflush(stdout);
 #endif
 
     if (texFormat.format == FORMAT_NONE)
     {
-        LOG(LOG_WARNING, "No Texture Conversion function available, size=%i format=%i\n", texInfo->size, texInfo->format);
+        DebugMessage(M64MSG_WARNING, "No Texture Conversion function available, size=%i format=%i",texInfo->size, texInfo->format);
     }
 
     switch(texFormat.format)
@@ -661,7 +663,7 @@ void TextureCache_LoadBackground( CachedTexture *texInfo )
 
     if (!dest || !swapped)
     {
-        LOG(LOG_ERROR, "Malloc failed!\n");
+        DebugMessage(M64MSG_ERROR, "Malloc failed!");
         return;
     }
 
@@ -693,7 +695,7 @@ void TextureCache_LoadBackground( CachedTexture *texInfo )
     }
     else
     {
-        LOG(LOG_VERBOSE, "Using 2xSAI Filter on Texture\n");
+        DebugMessage(M64MSG_VERBOSE, "Using 2xSAI Filter on Texture");
         texInfo->textureBytes <<= 2;
 
         scaledDest = (u32*) malloc( texInfo->textureBytes );
@@ -737,12 +739,12 @@ void TextureCache_Load( CachedTexture *texInfo )
     __texture_format(texInfo->size, texInfo->format, &texFormat);
 
 #ifdef PRINT_TEXTUREFORMAT
-    printf("TEX LUT=%i, TEXTURE SIZE=%i, FORMAT=%i -> GL FORMAT=%i\n", gDP.otherMode.textureLUT, texInfo->size, texInfo->format, texFormat.format); fflush(stdout);
+    DebugMessage(M64MSG_VERBOSE, "TEX LUT=%i, TEXTURE SIZE=%i, FORMAT=%i -> GL FORMAT=%i",gDP.otherMode.textureLUT, texInfo->size, texInfo->format, texFormat.format); fflush(stdout);
 #endif
 
     if (texFormat.format == FORMAT_NONE)
     {
-        LOG(LOG_WARNING, "No Texture Conversion function available, size=%i format=%i\n", texInfo->size, texInfo->format);
+        DebugMessage(M64MSG_WARNING, "No Texture Conversion function available, size=%i format=%i",texInfo->size, texInfo->format);
     }
 
     switch(texFormat.format)
@@ -783,7 +785,7 @@ void TextureCache_Load( CachedTexture *texInfo )
 
     if (!dest)
     {
-        LOG(LOG_ERROR, "Malloc failed!\n");
+        DebugMessage(M64MSG_ERROR, "Malloc failed!");
         return;
     }
 
@@ -861,13 +863,13 @@ void TextureCache_Load( CachedTexture *texInfo )
     if (!config.texture.sai2x || (texFormat.format == FORMAT_I8) || (texFormat.format == FORMAT_IA88))
     {
 #ifdef PRINT_TEXTUREFORMAT
-        printf("j=%i DEST=0x%x SIZE=%i F=0x%x, W=%i, H=%i, T=0x%x\n", j, dest, texInfo->textureBytes,glFormat, glWidth, glHeight, glType); fflush(stdout);
+        DebugMessage(M64MSG_VERBOSE, "j=%i DEST=0x%x SIZE=%i F=0x%x, W=%i, H=%i, T=0x%x",j, dest, texInfo->textureBytes,glFormat, glWidth, glHeight, glType); fflush(stdout);
 #endif
         glTexImage2D( GL_TEXTURE_2D, 0, glFormat, glWidth, glHeight, 0, glFormat, glType, dest);
     }
     else
     {
-        LOG(LOG_VERBOSE, "Using 2xSAI Filter on Texture\n");
+        DebugMessage(M64MSG_VERBOSE, "Using 2xSAI Filter on Texture");
 
         texInfo->textureBytes <<= 2;
 
@@ -1250,7 +1252,7 @@ void TextureCache_Update( u32 t )
 
     if (cache.current[t] == NULL)
     {
-        LOG(LOG_ERROR, "Texture Cache Failure\n");
+        DebugMessage(M64MSG_ERROR, "Texture Cache Failure");
     }
 
     glBindTexture( GL_TEXTURE_2D, cache.current[t]->glName );

@@ -397,7 +397,7 @@ EXPORT void CALL SetStretchVideo(bool stretch)
 
 EXPORT void CALL StartGL()
 {
-	printf("Hit StartGL\n");
+    DebugMessage(M64MSG_VERBOSE, "Hit StartGL");
     OGL_Start();
 }
 
