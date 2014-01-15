@@ -1398,7 +1398,7 @@ void OGL_SaveScreenshot()
     int i;
     for (i = 0; i < 100; i++)
     {
-        sDebugMessage(M64MSG_VERBOSE, filename, "%s_%03i.png", filepath, i);
+        DebugMessage(M64MSG_VERBOSE, filename, "%s_%03i.png", filepath, i);
         FILE *pFile = fopen(filename, "r");
         if (pFile == NULL)
             break;
