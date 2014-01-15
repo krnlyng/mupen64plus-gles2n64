@@ -104,6 +104,7 @@ EXPORT m64p_error CALL PluginStartup(m64p_dynlib_handle CoreLibHandle,
         void *Context, void (*DebugCallback)(void *, int, const char *))
 {
     l_DebugCallback = DebugCallback;
+    l_DebugCallContext = Context;
 
     CoreVideo_Init = (ptr_VidExt_Init) dlsym(CoreLibHandle, "VidExt_Init");
     CoreVideo_Quit = (ptr_VidExt_Quit) dlsym(CoreLibHandle, "VidExt_Quit");
