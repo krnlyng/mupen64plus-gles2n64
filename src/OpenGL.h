@@ -1,7 +1,6 @@
 #ifndef OPENGL_H
 #define OPENGL_H
 
-#include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 #include "gl2extimg.h"
@@ -75,17 +74,6 @@ struct GLInfo
 #ifdef WIN32
     SDL_Surface *hScreen;
 #endif
-
-    struct
-    {
-        EGLint		            version_major, version_minor;
-        EGLDisplay              display;
-        EGLContext              context;
-        EGLConfig               config;
-        EGLSurface              surface;
-        EGLNativeDisplayType    device;
-        EGLNativeWindowType     handle;
-    } EGL;
 
     bool    screenUpdate;
 

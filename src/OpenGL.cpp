@@ -5,25 +5,11 @@
 #include <string.h>
 #include <time.h>
 #include <png.h>
-#if 0
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
-#endif
 #include <unistd.h>
 
 //#include "bcm_host.h"
 
 #include "GLES/gl.h"
-
-#if 0
-#include "EGL/egl.h"
-#include "EGL/eglext.h"
-
-#include <SDL.h>
-#include <SDL/SDL_syswm.h>
-
-#endif
 
 #define timeGetTime() time(NULL)
 
@@ -90,23 +76,6 @@ const char _default_fsh[] = "                           \n\t" \
 "gl_FragColor = texture2D(uTex, vTexCoord);             \n\t" \
 "}                                                      \n\t";
 
-const EGLint ConfigAttribs[] =
-{
-	EGL_LEVEL,				0,
-	EGL_DEPTH_SIZE,         16,
-	EGL_STENCIL_SIZE,       0,
-	EGL_SURFACE_TYPE,		EGL_WINDOW_BIT,
-	EGL_RENDERABLE_TYPE,	EGL_OPENGL_ES2_BIT,
-	EGL_NATIVE_RENDERABLE,	EGL_FALSE,
-	EGL_NONE
-};
-
-const EGLint ContextAttribs[] =
-{
-	EGL_CONTEXT_CLIENT_VERSION, 	2,
-	EGL_NONE
-};
-
 void OGL_EnableRunfast()
 {
 #ifdef __arm__
@@ -123,32 +92,6 @@ void OGL_EnableRunfast()
 	);
 #endif
 }
-
-#if 0
-
-const char* EGLErrorString()
-{
-	EGLint nErr = eglGetError();
-	switch(nErr){
-		case EGL_SUCCESS: 				return "EGL_SUCCESS";
-		case EGL_BAD_DISPLAY:			return "EGL_BAD_DISPLAY";
-		case EGL_NOT_INITIALIZED:		return "EGL_NOT_INITIALIZED";
-		case EGL_BAD_ACCESS:			return "EGL_BAD_ACCESS";
-		case EGL_BAD_ALLOC:				return "EGL_BAD_ALLOC";
-		case EGL_BAD_ATTRIBUTE:			return "EGL_BAD_ATTRIBUTE";
-		case EGL_BAD_CONFIG:			return "EGL_BAD_CONFIG";
-		case EGL_BAD_CONTEXT:			return "EGL_BAD_CONTEXT";
-		case EGL_BAD_CURRENT_SURFACE:	return "EGL_BAD_CURRENT_SURFACE";
-		case EGL_BAD_MATCH:				return "EGL_BAD_MATCH";
-		case EGL_BAD_NATIVE_PIXMAP:		return "EGL_BAD_NATIVE_PIXMAP";
-		case EGL_BAD_NATIVE_WINDOW:		return "EGL_BAD_NATIVE_WINDOW";
-		case EGL_BAD_PARAMETER:			return "EGL_BAD_PARAMETER";
-		case EGL_BAD_SURFACE:			return "EGL_BAD_SURFACE";
-		default:						return "unknown";
-	}
-};
-
-#endif
 
 int OGL_IsExtSupported( const char *extension )
 {
@@ -253,269 +196,19 @@ void OGL_ResizeWindow()
     //hmmm
 }
 
-#if 0
-
-#if defined(SDL_WINDOW)
-bool OGL_SDL_Start()
-{
-    const SDL_VideoInfo *videoInfo;
-
-    /* Initialize SDL */
-    DebugMessage(M64MSG_VERBOSE, "Initializing SDL video subsystem...\n" );
-    if (SDL_InitSubSystem( SDL_INIT_VIDEO ) == -1)
-    {
-        DebugMessage(M64MSG_VERBOSE,  "Error initializing SDL video subsystem: %s",SDL_GetError() );
-        return FALSE;
-    }
-
-    /* Video Info */
-    DebugMessage(M64MSG_VERBOSE,"Getting video info...\n" );
-    if (!(videoInfo = SDL_GetVideoInfo()))
-    {
-        DebugMessage(M64MSG_VERBOSE,"Video query failed: %s",SDL_GetError() );
-        SDL_QuitSubSystem( SDL_INIT_VIDEO );
-        return FALSE;
-    }
-    /* Set the video mode */
-    DebugMessage(M64MSG_VERBOSE, "Setting video mode %dx%d...",(int)OGL.winWidth, (int)OGL.winHeight );
-    if (!(OGL.hScreen = SDL_SetVideoMode( OGL.winWidth, OGL.winHeight - 32, 16, SDL_SWSURFACE )))
-    {
-        DebugMessage(M64MSG_ERROR, "Problem setting videomode %dx%d: %s",(int)OGL.winWidth, (int)OGL.winHeight, SDL_GetError() );
-        SDL_QuitSubSystem( SDL_INIT_VIDEO );
-        return FALSE;
-    }
-    SDL_WM_SetCaption( pluginName, pluginName );
-
-	SDL_SysWMinfo info;
-	SDL_VERSION(&info.version);
-	SDL_GetWMInfo(&info);
-	OGL.EGL.handle = (EGLNativeWindowType) info.window;
-	OGL.EGL.device = GetDC(OGL.EGL.handle);
-
-	return true;
-}
-#endif
-
-bool OGL_X11_Start()
-{
-	LOG(M64MSG_INFO, "Starting X11 Window");
-
-	Window window;
-	Display *display;
-	XEvent event;
-    Atom atomdelete, atomhint;
-	XWindowAttributes attributes;
-
-	display = XOpenDisplay(NULL);
-    if (!display) {
-        DebugMessage(M64MSG_ERROR, "Cannot connect to X server");
-		return false;
-    }
-
-    //get dimensions of framebuffer / window
-	int x, y, w, h;
-    if (config.window.centre){
-        config.window.xpos = (config.screen.width - config.window.width) / 2;
-        config.window.ypos = (config.screen.height - config.window.height) / 2;
-    }
-
-    if (config.window.fullscreen){
-        x = 0;
-        y = 0;
-        w = config.screen.width;
-        h = config.screen.height;
-    } else {
-        x = 0;
-        y = 0;
-        w = config.window.width;
-        h = config.window.height;
-        config.window.xpos = 0;
-        config.window.ypos = 0;
-    }
-
-    if (config.framebuffer.enable){
-        config.framebuffer.xpos = 0;
-
-
-        config.framebuffer.ypos = 0;
-    } else {
-        if (config.window.fullscreen) {
-            config.framebuffer.xpos = (config.screen.width - config.window.width) / 2;
-            config.framebuffer.ypos = (config.screen.height - config.window.height) / 2;
-        } else {
-            config.framebuffer.xpos = 0;
-            config.framebuffer.ypos = 0;
-        }
-
-        config.framebuffer.width = config.window.width;
-        config.framebuffer.height= config.window.height;
-    }
-
-    //create window
-    int black = BlackPixel(display, DefaultScreen(display));
-	window = XCreateSimpleWindow(display, DefaultRootWindow(display), x, y, w, h, 0, black, black);
-	if (!window){
-        DebugMessage(M64MSG_ERROR, "Failed to create X window");
-		return false;
-    }
-
-	//make fullscreen window
-	if (config.window.fullscreen){
-		struct {
-			unsigned long   flags;
-			unsigned long   functions;
-			unsigned long   decorations;
-			long            inputMode;
-			unsigned long   status;
-		} hints;
-
-		hints.flags = 2;
-		hints.decorations = 0;
-		atomhint = XInternAtom(display, "_MOTIF_WM_HINTS", False);
-		XChangeProperty(display, window, atomhint, atomhint, 32, PropModeReplace, (unsigned char *) &hints,5);
-        XDefineCursor(display, window, None);
-	}
-
-
-	//set name and show window
-    XStoreName (display, window, "gles2n64" );
-	XMapWindow(display, window);
-	XFlush(display);
-
-    OGL.EGL.device = (EGLNativeDisplayType) display;
-	OGL.EGL.handle = (void*) window;
-
-	return true;
-}
-
-int oneshot_hack = 0;
-
-#endif
-
 bool OGL_Start()
 {
-
-	if(CoreVideo_Init() != M64ERR_SUCCESS)
-	{
-        	DebugMessage(M64MSG_ERROR,"CoreVideo_Init failed.");
-		return false;
-	}
-    	
-	if(CoreVideo_SetVideoMode(config.screen.width, config.screen.height, config.screen.bpp, config.window.fullscreen ? M64VIDEO_FULLSCREEN : M64VIDEO_WINDOWED, M64VIDEOFLAG_SUPPORT_RESIZING) != M64ERR_SUCCESS)
-	{
-		DebugMessage(M64MSG_ERROR,"CoreVideo_SetVideoMode failed.");
-		return false;
-	}
-#if 0
-
-	if(oneshot_hack == 0){
-		oneshot_hack = 1;
-	}else{
-		return TRUE;
-	}
-
-	bcm_host_init();
-
-	uint32_t config.screen.width;
-    uint32_t config.screen.height;
-
-    GLint   success;
-
-    EGLBoolean result;
-	EGLint num_config;
-
-	static EGL_DISPMANX_WINDOW_T nativewindow;
-
-	DISPMANX_ELEMENT_HANDLE_T dispman_element;
-	DISPMANX_DISPLAY_HANDLE_T dispman_display;
-	DISPMANX_UPDATE_HANDLE_T dispman_update;
-	VC_RECT_T dst_rect;
-	VC_RECT_T src_rect;
-
-	static const EGLint attribute_list[] =
-	{
-	    EGL_RED_SIZE, 8,
-	      EGL_GREEN_SIZE, 8,
-	      EGL_BLUE_SIZE, 8,
-	      EGL_ALPHA_SIZE, 8,
-	      EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
-	      EGL_NONE
-	};
-	   
-	 // get an EGL display connection
-   OGL.EGL.display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
-   if (OGL.EGL.display == EGL_NO_DISPLAY){
-        DebugMessage(M64MSG_ERROR, "EGL Display Get failed: %s ",EGLErrorString());
-        return FALSE;
-   }
-
-   // initialize the EGL display connection
-   if (!eglInitialize(OGL.EGL.display, NULL, NULL)){
-        DebugMessage(M64MSG_ERROR, "EGL Display Initialize failed: %s ",EGLErrorString());
-        return FALSE;
+    if(CoreVideo_Init() != M64ERR_SUCCESS)
+    {
+        DebugMessage(M64MSG_ERROR,"CoreVideo_Init failed.");
+        return false;
     }
-
-   // get an appropriate EGL frame buffer configuration
-   if (!eglChooseConfig(OGL.EGL.display, attribute_list, &OGL.EGL.config, 1, &num_config)){
-        DebugMessage(M64MSG_ERROR, "EGL Configuration failed: %s ",EGLErrorString());
-        return FALSE;
+	
+    if(CoreVideo_SetVideoMode(config.screen.width, config.screen.height, config.screen.bpp, config.window.fullscreen ? M64VIDEO_FULLSCREEN : M64VIDEO_WINDOWED, M64VIDEOFLAG_SUPPORT_RESIZING) != M64ERR_SUCCESS)
+    {
+        DebugMessage(M64MSG_ERROR,"CoreVideo_SetVideoMode failed.");
+        return false;
     }
-
-
-   //eglBindAPI(EGL_OPENGL_ES_API);
-
-   OGL.EGL.context = eglCreateContext(OGL.EGL.display, OGL.EGL.config, EGL_NO_CONTEXT, NULL);
-   if (OGL.EGL.context == EGL_NO_CONTEXT){
-        DebugMessage(M64MSG_ERROR, "EGL Context Creation failed: %s ",EGLErrorString());
-        return FALSE;
-   }
-
-   // create an EGL window surface
-   success = graphics_get_display_size(0 /* LCD */, &config.screen.width, &config.screen.height);
-   if (success < 0){
-        DebugMessage(M64MSG_ERROR, "graphics_get_display_size failed: %d ",success);
-        return FALSE;
-   }
-
-   dst_rect.x = 0;
-   dst_rect.y = 0;
-   dst_rect.width = config.screen.width;
-   dst_rect.height = config.screen.height;
-      
-   src_rect.x = 0;
-   src_rect.y = 0;
-   src_rect.width = config.screen.width << 16;
-   src_rect.height = config.screen.height << 16;        
-
-   dispman_display = vc_dispmanx_display_open( 0 /* LCD */);
-   dispman_update = vc_dispmanx_update_start( 0 );
-         
-   dispman_element = vc_dispmanx_element_add ( dispman_update, dispman_display,
-      0/*layer*/, &dst_rect, 0/*src*/,
-      &src_rect, DISPMANX_PROTECTION_NONE, 0 /*alpha*/, 0/*clamp*/, (DISPMANX_TRANSFORM_T)0/*transform*/);
-      
-   nativewindow.element = dispman_element;
-   nativewindow.width = config.screen.width;
-   nativewindow.height = config.screen.height;
-   vc_dispmanx_update_submit_sync( dispman_update );
-      
-   OGL.EGL.surface = eglCreateWindowSurface( OGL.EGL.display, OGL.EGL.config, &nativewindow, NULL );
-   if (OGL.EGL.surface == EGL_NO_SURFACE){
-        DebugMessage(M64MSG_ERROR, "EGL surface Creation failed: %s ",EGLErrorString());
-        return FALSE;
-   }
-
-
-   // connect the context to the surface
-   if (!eglMakeCurrent(OGL.EGL.display, OGL.EGL.surface, OGL.EGL.surface, OGL.EGL.context)){
-        DebugMessage(M64MSG_ERROR, "EGL Make Current failed: %s ",EGLErrorString());
-        return FALSE;
-    };   
-#endif
-/////////////////////////
-
-    //eglSwapInterval(OGL.EGL.display, config.verticalSync);
-
     OGL_InitStates();
 
     //clear back buffer:
@@ -525,7 +218,6 @@ bool OGL_Start()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glFinish();
     CoreVideo_GL_SwapBuffers();
-    //eglSwapBuffers(OGL.EGL.display, OGL.EGL.surface);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glFinish();
 
@@ -587,13 +279,6 @@ bool OGL_Start()
         config.texture.maxAnisotropy = (int)f;
     }
 
-    //Print some info
-    EGLint attrib;
-    DebugMessage(M64MSG_INFO, "Width: %i Height:%i ",config.screen.width, config.screen.height);
-    //eglGetConfigAttrib(OGL.EGL.display, OGL.EGL.config, EGL_DEPTH_SIZE, &attrib);
-    DebugMessage(M64MSG_INFO, "[gles2n64]: Depth Size: %i ",attrib);
-    //eglGetConfigAttrib(OGL.EGL.display, OGL.EGL.config, EGL_BUFFER_SIZE, &attrib);
-    DebugMessage(M64MSG_INFO, "[gles2n64]: Color Buffer Size: %i ",attrib);
     DebugMessage(M64MSG_INFO, "[gles2n64]: Enable Runfast... ");
 
     OGL_EnableRunfast();
@@ -651,19 +336,6 @@ void OGL_Stop()
     TextureCache_Destroy();
 
     CoreVideo_Quit();
-#if 0
-#ifdef X11_WINDOW
-    if (config.window.enableX11)
-        XDestroyWindow((Display*) OGL.EGL.display, (Window) OGL.EGL.handle);
-    else
-        system("sudo /etc/init.d/slim-init start");
-#endif
-
-	eglMakeCurrent(OGL.EGL.display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-	eglDestroySurface(OGL.EGL.display, OGL.EGL.surface);
- 	eglDestroyContext(OGL.EGL.display, OGL.EGL.context);
-   	eglTerminate(OGL.EGL.display);
-#endif
 }
 
 void OGL_UpdateCullFace()
@@ -1593,7 +1265,6 @@ void OGL_SwapBuffers()
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
         CoreVideo_GL_SwapBuffers();
-        //eglSwapBuffers(OGL.EGL.display, OGL.EGL.surface);
 
         glBindFramebuffer(GL_FRAMEBUFFER, OGL.framebuffer.fb);
         OGL_UpdateViewport();
@@ -1603,7 +1274,6 @@ void OGL_SwapBuffers()
     else
     {
         CoreVideo_GL_SwapBuffers();
-        //eglSwapBuffers(OGL.EGL.display, OGL.EGL.surface);
     }
 
     OGL.screenUpdate = false;
