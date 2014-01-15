@@ -101,6 +101,7 @@ void Config_SetOption(const char *config, const char *value)
     int setting = atoi(value);
     for(i=0;i<option_mapping_count;i++) {
         if(0 == strcmp(config, option_mappings[i].oldconfig) || 0 == strcmp(config, option_mappings[i].newconfig)) {
+            DebugMessage(M64MSG_WARNING, "WARNING: using rom database override setting for %s: %d", option_mappings[i].newconfig, setting);
 	    *(option_mappings[i].cfg) = setting;
             break;
         }
