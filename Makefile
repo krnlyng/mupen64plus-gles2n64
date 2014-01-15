@@ -23,8 +23,15 @@
 ARCH = ARM
 OS = LINUX
 
-CFLAGS  = -Wall -pipe -O3 -g
-LDFLAGS = -g
+DEBUG ?= 0
+
+CFLAGS  = -Wall -pipe -O3
+LDFLAGS =
+
+ifeq ($(DEBUG), 1)
+    CFLAGS += -g
+    LDFLAGS += -g
+endif
 
 COMPILER_DIR = /usr
 SO_EXTENSION = so
