@@ -203,6 +203,9 @@ void Config_LoadConfig()
     ConfigSetDefaultBool(l_ConfigVideoGeneral, "VerticalSync", false, "Use vertical sync if True, or not if False");
     // end set default options
 
+    // save the default configuration if there is none there yet
+    ConfigSaveSection("Video-General");
+
     // get settings
     config.window.fullscreen = ConfigGetParamBool(l_ConfigVideoGeneral, "Fullscreen");
     config.screen.width = ConfigGetParamInt(l_ConfigVideoGeneral, "ScreenWidth");
@@ -266,6 +269,9 @@ void Config_LoadConfig()
     ConfigSetDefaultBool(l_ConfigVideo, "HackAlpha", false, "Enable Alpha Hack");
     ConfigSetDefaultBool(l_ConfigVideo, "HackZ", false, "Enable Z Hack");
     // end set default options
+
+    // save the default configuration if there is none there yet
+    ConfigSaveSection("Video-gles2n64");
 
     // get settings
     // Window Settings
