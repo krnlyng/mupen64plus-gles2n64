@@ -9,7 +9,7 @@
 
 //#include "bcm_host.h"
 
-#include "GLES/gl.h"
+#include "GLES2/gl2.h"
 
 #define timeGetTime() time(NULL)
 
