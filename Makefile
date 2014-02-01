@@ -160,7 +160,7 @@ OBJDIRS = $(dir $(OBJECTS))
 $(shell $(MKDIR) $(OBJDIRS))
 
 # build targets
-TARGET = mupen64plus-video-gles2n64-pi$(POSTFIX).$(SO_EXTENSION)
+TARGET = mupen64plus-video-gles2n64$(POSTFIX).$(SO_EXTENSION)
 
 all: $(TARGET)
 
