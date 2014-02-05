@@ -49,6 +49,10 @@ CFLAGS += -I/opt/vc/include/interface/vmcs_host/linux
 CFLAGS += -mfpu=neon -mfloat-abi=hard -flto
 CFLAGS += -D__CRC_OPT -D__TRIBUFFER_OPT -D__VEC4_OPT -DARM -DUSE_SDL 
 
+ifeq ($(NEON), 1)
+    CFLAGS += -D__NEON_OPT
+endif
+
 ifeq ($(OS), LINUX)
 CFLAGS += -Wall -D__LINUX__ -fPIC
 LDFLAGS += -L/usr/lib
